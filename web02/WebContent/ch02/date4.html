@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<div id="clock"></div>
+	<script>
+		function setClock() {
+			var now = new Date();
+			var s = "<span style='color:blue;'"+ now.getFullYear() + "-" + (now.getMonth() + 1) + " - " 
+					+ now.getDate() + " " + now.getHours() + " : "
+					+ now.getMinutes() + " : " + now.getSeconds();
+					
+					document.getElementById("clock").innerHTML = s;
+		}
+		
+		setInterval("setClock()", 1000);
+//		setTimeout("setClock()", 1000);
+ 
+	</script>
+	
+</body>
+</html>

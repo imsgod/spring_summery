@@ -1,0 +1,54 @@
+package com.example.spring01.controller;
+
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+public class MainControllerTest {
+
+	@Test
+	public void testMain() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testGugu() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testTest() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDoA() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDoB() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDoC() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDoD() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDoE() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDoF() {
+		fail("Not yet implemented");
+	}
+
+}

@@ -1,0 +1,409 @@
+﻿11화
+--------------------------------------------------------------------------------
+1. pdf  
+
+- itextpdf 라이브러리, http:itextpdf.com, 
+  api; http://developers.itextpdf.com/examples-itext5 << 응용할 소스가 있음. 
+  한글 처리를 위해서는 폰트 정보가 필요함.
+
+- pom.xml에 dependency 추가
+mvnrepository.com > (reserch word) itextpdf - > 
+					(제일 상단)ItextCore 	>> 5.5.13 ver
+					itext-pdfa		>> 5.5.13 ver
+					itext-xtra		>> 5.5.13 ver
+					xmlworker		>> 5.5.13 ver
+					itext-asian		>> 5.2.0 ver
+
+		<!-- https://mvnrepository.com/artifact/com.itextpdf/itextpdf -->
+		<dependency>
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>itextpdf</artifactId>
+		    <version>5.5.13</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.itextpdf/itext-pdfa -->
+		<dependency>
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>itext-pdfa</artifactId>
+		    <version>5.5.13</version>
+		    <scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.itextpdf/itext-xtra -->
+		<dependency>
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>itext-xtra</artifactId>
+		    <version>5.5.13</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.itextpdf.tool/xmlworker -->
+		<dependency>
+		    <groupId>com.itextpdf.tool</groupId>
+		    <artifactId>xmlworker</artifactId>
+		    <version>5.5.13</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.itextpdf/itext-asian -->
+		<dependency>
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>itext-asian</artifactId>
+		    <version>5.2.0</version>
+		</dependency>
+
+tip) ctrl + shift + f (코드 뷰티파이)
+
+- src\main\webapp\WEB-INF\views\include - > admin_menu (기존)
+		
+	...
+	 <a href="${path}/shop/product/list.do">상품 목록</a> |
+	 <a href="${path}/shop/product/write.do">상품 등록</a> |
+	 <a href="${path}/pdf/list.do">PDF</a> |
+
+- src\main\java\com\example\spring02\controller -> pdf(package 생성)
+- src\main\java\com\example\spring02\controller\pdf - >PdfController(생성)
+
+package com.example.spring02.controller.pdf;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+@Controller
+@RequestMapping("pdf/*")
+public class PdfController {
+	
+	@RequestMapping("list.do")
+	public ModelAndView list() throws Exception {
+		return null;
+	}
+}
+
+- src\main\java\com\example\spring02\service -> pdf(package 생성)
+- src\main\java\com\example\spring02\service\pdf - > PdfService(interface 생성)
+
+package com.example.spring02.service.pdf;
+
+public interface PdfService {
+	public String create();
+}
+
+- src\main\java\com\example\spring02\service\pdf - > PdfServiceImpl(생성)
+
+package com.example.spring02.service.pdf;
+
+import java.io.FileOutputStream;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.example.spring02.service.shop.CartService;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
+@Service
+public class PdfServiceImpl implements PdfService{
+	
+	@Inject
+	CartService cartService;
+	
+	@Override
+	public String create() {
+		String result = "";
+		try {
+			// pdf 문서 객체
+			Document document = new Document();
+			// pdf 생성 객체
+			PdfWriter writer = PdfWriter.getInstance(document, 
+						new FileOutputStream("d:/work/sample.pdf"));
+			
+			document.open();
+			//한글 지원이 되는 폰트 지정
+			BaseFont baseFont = BaseFont.createFont("C:/Windows/Fonts/D2Coding.ttc", 
+								BaseFont.IDENTITY_H, BaseFont.EMBEDDED); 
+			//폰트 사이즈 지정
+			Font font = new Font(baseFont, 12);
+			// 4개 컬럼을 가진 테이블 생성
+			PdfPTable table = new PdfPTable(4);
+			
+			Chunk chunk = new Chunk("장바구니", font);
+			Paragraph phragraph = new Paragraph(chunk);
+			phragraph.setAlignment(Element.ALIGN_CENTER); // 가운데 정렬
+			
+			document.add(phragraph);
+			document.add(Chunk.NEWLINE); // 줄바꿈
+			document.add(Chunk.NEWLINE);
+			//document.add(Chunk.NEXTPAGE); // 다음 페이지
+			
+			//셀 생성
+			PdfPCell cell1 = new PdfPCell(new Phrase("상품명",font));
+			PdfPCell cell2 = new PdfPCell(new Phrase("단가", font));
+			PdfPCell cell3 = new PdfPCell(new Phrase("수량",font));
+			PdfPCell cell4 = new PdfPCell(new Phrase("금액", font));
+			
+			//테이블에 셀 추가 
+			table.addCell(cell1);
+			table.addCell(cell2);
+			table.addCell(cell3);
+			table.addCell(cell4);
+			
+			//documentdp 테이블 추가
+			document.add(table);
+			document.close();
+			
+			
+			result = "pdf 파일이 생성 되었습니다.";
+		} catch (Exception e) {
+			result = "pdf 파일 생성 실패...";
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+}
+
+- src\main\java\com\example\spring02\controller\pdf - >PdfController(기존)
+	
+	...
+	@Inject
+	PdfService pdfService;
+	
+	@RequestMapping("list.do")
+	public ModelAndView list() throws Exception {
+		String result = pdfService.create();
+		
+		return new ModelAndView("pdf/result", "msg", result);
+	}
+
+
+
+- src\main\webapp\WEB-INF\views -> pdf(폴더 생성)
+- src\main\webapp\WEB-INF\views\pdf -> result(jsp 생성)
+
+2. 차트
+
+2-1. 구글 차트 : https://google-developers.appspot.com/chart/ ( https://google-developers.appspot.com/ << 참고)
+	- pom.xml 추가 (구글 차트는 json으로 데이터를 주고 받기 때문에.)
+	
+		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+		<dependency>
+		    <groupId>com.googlecode.json-simple</groupId>
+		    <artifactId>json-simple</artifactId>
+		    <version>1.1.1</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.9.8</version>
+		</dependency>
+
+	- 자바 스크립트를 이용하여 차트 작성에 필요한 JSON 데이터를 리턴받아 화면에 출력(google이 원한는 형식으로)
+	json객체 : {"변수" : 값} // json 객체 배열 []
+	
+	- src\main\webapp\WEB-INF\views\include - > admin_menu (기존)
+	
+	...
+	<a href="${path}/shop/product/list.do">상품 목록</a> |
+	<a href="${path}/shop/product/write.do">상품 등록</a> |
+	<a href="${path}/pdf/list.do">PDF</a> |
+	<a href="${path}/chart/chart1.do">Google Chart(json)</a> |	<< 추가
+	<a href="${path}/chart/chart2.do">Google Chart(db)</a> |	<< 추가
+	<a href="${path}/jchart/chart1.do">JFree Chart(png)</a> |	<< 추가
+	<a href="${path}/jchart/chart2.do">JFree Chart(pdf)</a> |	<< 추가
+	
+	- src\main\java\com\example\spring02\controller -> chart(package 생성)
+	- src\main\java\com\example\spring02\controller\chart - > GoogleChartController(생성)
+	(구글 샘플자료 확인)
+
+	package com.example.spring02.controller.chart;
+
+	import org.springframework.stereotype.Controller;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.ResponseBody;
+	import org.springframework.web.bind.annotation.RestController;
+	import org.springframework.web.servlet.ModelAndView;
+
+	import com.example.spring02.model.member.dto.MemberDTO;
+	import com.example.spring02.model.shop.dto.ProductDTO;
+
+	//@RestController
+	@Controller
+	@RequestMapping("chart/*")
+	public class GoogleChartController {
+	
+		@ResponseBody // <<@Controller 사용시, 테스트용 (db x)
+		@RequestMapping("chart1.do")
+		public ModelAndView chart1() {
+			return new ModelAndView("chart/chart01");
+		}	 
+	
+		/*
+		@RequestMapping("chart1.do")  // <<@RestController 사용시
+		public ModelAndView chart1() {
+			return new ModelAndView("chart/chart01");
+		} */
+	}
+
+	
+
+	- src\main\webapp\WEB-INF\views -> chart(폴더 생성)
+
+	- src\main\webapp\WEB-INF\views -> json(폴더 생성)
+	- src\main\webapp\WEB-INF\views\json -> sampleData.json(file 생성)(구글 template)
+	{
+	"rows": [
+		{
+			"c" : [
+			{
+				"v" : "귤"
+			},
+			{
+				"v" : 35000
+			}
+		  ]
+		},
+		{
+			"c" : [
+			{
+				"v" : "딸기"
+			},
+			{
+				"v" : 15000
+			}
+		  ]
+		},
+		{
+			"c" : [
+			{
+				"v" : "레몬"
+			},
+			{
+				"v" : 165000
+			}
+		  ]
+		},
+		{
+			"c" : [
+			{
+				"v" : "오렌지"
+			},
+			{
+				"v" : 20000
+			}
+		  ]
+		},
+		{
+			"c" : [
+			{
+				"v" : "키위"
+			},
+			{
+				"v" : 30000
+			}
+		  ]
+		},
+		{
+			"c" : [
+			{
+				"v" : "포도"
+			},
+			{
+				"v" : 35000
+			}
+		  ]
+		}
+	],
+	"cols" : [
+		{
+			"label":"상품명",
+			"type":"string"
+		},
+		{
+			"label":"금액",
+			"type":"number"
+		}
+	]
+}
+	
+	
+	- servlet-contextdp 리소스 매핑 추가
+	<resources mapping="/json/**"		location="/WEB-INF/views/json/" />
+
+	- src\main\webapp\WEB-INF\views\chart -> chart01(jsp 생성)
+	<%@ page language="java" contentType="text/html; charset=UTF-8"
+  	  pageEncoding="UTF-8"%>
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Insert title here</title>
+	<%@ include file="../include/header.jsp" %>
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+	<script>
+		// 구글 차트 라이브러리 로딩
+		google.load("visualization", "1", {
+			"packages" : ["corechart"]
+		});
+		// 라이브러리 로딩이 완료 되면 drawChart함수 호출. 주의! drawChart() <- x // drawChart <- o
+		google.setOnLoadCallback(drawChart);
+		function drawChart() {
+			// 차트 그리기를 위한 json 데이터 로딩
+			var jsonData=$.ajax({
+				url : "${path}/json/sampleData.json",
+				dataType : "json",
+				async : false
+			}).responseText;
+			console.log(jsonData);
+			// json  => dataTable 
+			var data = new google.visualization.DataTable(jsonData);
+			
+			/* 파이차트
+			var chart = new google.visualization.PieChart(
+								document.getElementById("chart_div")); 
+			*/
+			/* 라인차트
+			var chart = new google.visualization.LineChart(
+					document.getElementById("chart_div")); 
+			*/
+			var chart = new google.visualization.ColumnChart(
+					document.getElementById("chart_div")); 
+				chart.draw(data,{
+					title : "차트 예제",
+					/*curveType : "function", pie chart 옵션이 아닌 line chart 옵션만 */
+					width : 600,
+					height : 400
+				});
+			}
+	</script>
+
+	</head>
+	<body>
+	<%@ include file="../include/admin_menu.jsp" %>
+
+	<div id="chart_div"></div>
+	<button id="btn" type="button" onclick="drawChart()">refresh</button>
+
+	</body>
+	</html>
+	
+	tip) 	동기식: a ->(fin)->b 순차적으로 실행
+		비동기식: a = b 동시 진행
+	
+	- admin 로그인 http://localhost:8080/spring02/chart/chart1.do 을 실행하면 안나오는게 맞다.
+	 f12 키눌러서 json데이터가 로딩이 되었는지 확인!
+	
+	
+	- src\main\java\com\example\spring02\controller\chart - > GoogleChartController(기존)
+	(DB자료 확인)
+	
+	...
+	
+
+- 2. JFreeChart: http://www.jfree.org/jfreechart/

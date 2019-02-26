@@ -1,0 +1,518 @@
+2화
+--------------------------------------------------------------------------------
+1.d:\work에 workspace 셋팅 
+
+2.기본 인코딩 utf-8로 변경 및 폰트 조정
+-(메뉴 Window-preferences-General-Workspace-TextFileEncoding->UTF-8)
+			-Editors-Text Editors-Spelling->UTF-8)	
+	
+-html/css/jsp의 인코딩을 utf-8로 변경
+(메뉴 Window-preferences-Web-CSS Files->Encoding:ISO 10646/Unicode(UTF-8)	
+			 Web-HTML Files->Encoding:ISO 10646/Unicode(UTF-8)
+			 Web-Jsp Files->Encoding:ISO 10646/Unicode(UTF-8)
+
+-jsp 페이지의 템플릿 변경
+(메뉴 Window-preferences-Web-Jsp Files-Editor-Templates-New Jsp File(html)
+선택후 오른쪽 Edit.. 클릭
+<%@ page language="java" contentType="text/html; charset=${encoding}"
+    pageEncoding="${encoding}"%>
+<!DOCTYPE html> <<추가
+<html>
+....
+
+- (메뉴 Window-preferences-General-Appearance-Colors and Font->Basic-Text Font조절
+
+3. Get방식의 한글 데이터 처리(tomcat 구버전)
+- Server.xml 편집 URIEncoding="utf-8" 속성 추가(2군데)
+  <Connector connectionTimeout="20000" port="8080" protocol="HTTP/1.1"
+	redirectPort="8443" URIEncoding="utf-8" />
+ <Connector port="8009" protocol="AJP/1.3" redirectProt="8443"
+	URIEncoding="utf-8" />
+
+4. 샘플 프로젝트 import
+D:\aa_iksData\언어_시리즈\life_soft_시리즈\lifesoft_sources\샘플프로젝트.zip
+
+5. Java Build Path 확인
+-(메뉴 Window-preferences-Java-Installed JREs-jdk셋팅)
+-(메뉴 Window-preferences-Server-Runtime Env-WAS셋팅(기본 톰켓))
+and
+(sample) 프로젝트에서 alt + enter 후 build path-Libraries 탭,
+JRE Sysstem Library, 
+Apach Tomcat unbound되어있는지 확인(unbound되어 있다면 셋팅) 확인
+Project Facets에서 자바 버전 확인
+
+6. spring legacy project만들고 
+logback.xml 에 ! 경고 표시 나거든...
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration> <<-- 추가 코드
+
+7. 메이븐 기본 디렉토리
+c:\Users\사용자계정\.m2 << mvn jar 파일 repository(restore)
+해당 프로젝트 선택 후, mvn jar 파일 업데이트 : alt + f5(function key)
+mvn 빌드 관련해서 문제가 있다면 sts tool을 종료하고,
+.m2 하위 폴더인 repository 삭제 후 sts (재)실행하면 된다.
+
+8. sample 프로젝트 웹 브라우저에 띄웠음. 
+그리고 새로운 Spring Legacy Project- spring MVC project 생성.
+
+spring boot - 설정 최소화된 버전
+spring legacy - 지금 실무에서 쓰는 버전
+
+-프로젝트 : spring01
+ 패키지 이름: com.example.spring01
+
+- pom.xml에서 아래 확인
+ <java-version>1.6</java-version> 1.6 -> 1.8
+ <org.springframework-version>3.1.1.RELEASE</org.springframework-version>
+				3.1.1.RELEASE - > 5.0.3
+<org.aspectj-version>1.8.10</org.aspectj-version>
+<org.slf4j-version>1.7.25</org.slf4j-version>
+
+- (해당 프로젝트 선택 후) alt + enter -> <5.> 확인, java complier -> 1.8확인 
+
+- 프로젝트 시작시 spring관련 라이브러리가 깨진다면,
+대표적으로 에러중에서 'invlid LOC header'(bad signature) 같은..
+
+(해당 프로젝트 선택 후 우클릭) Maven - Disable Mavne Nature (프로젝트에서 MVN을 제거)
+다시 우클릭 후 Configure - Convert to Maven Project
+
+- 해당 프로젝트(spring01) 웹 구동.
+
+- sample 프로젝트에서 설정 파일 복사 
+	-> pom.xml, resources 디렉토리, WEB-INF 디렉토리
+	-> sample/pom.xml에서 9line <properties> 에서 부터 끝까지 spring01/pom.xml로
+	-> sample/resources의 하위 파일들을 spring01/resources로 복사
+	-> sample/src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml,root-context.xml을
+	   spring01/src/main/webapp/WEB-INF/spring에 복사
+
+	servlet-context.xml에서 
+
+	-> sample/src/main/webapp/WEB-INF/Web.xml 도 복사.
+	
+- 처음 한글 깨짐 현상 : 태그 추가
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page session="false" %>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"> << 추가
+....
+참고 : https://www.w3schools.com/tags/att_meta_http_equiv.asp
+
+9. 서버 start up -> web.xml -> 
+-- DispatcherServlet  정보 확인 ->
+		<servlet>
+		<servlet-name>appServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring/appServlet/servlet-context.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>appServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+--> servlet-context.xml :컨트롤러 등록및 매핑
+ <context:component-scan base-package="com.example.spring01" />
+	
+--> 컨트롤러 : HomeController 의 home()실행 return "home" 은 아래의 영향(servlet-context)
+	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+-------------------------------------------------------------------------------- 
+
+3화
+-------------------------------------------------------------------------------- 
+1. url pattern
+/	=> Default Servlet (이제는 spring 에서) DispatcherServlet에서 관리하겠다.
+						 (servlet-context.xml 참조)
+/*	=> 모든 요청(서블릿 + jsp)
+*.do	=> 서블릿 중에서도 .do로 끝나는 확장자만 사용.
+톰켓에서 내장된 서블릿
+DefaultServlet	=> 서블릿 클래스 매핑
+JspServlet => *.jsp 페이지 매핑
+
+2. servlet-context.xml에서 아래의 태그는 스프링에서 관리하는 bean의 기본 디렉토리이다.
+   <context:component-scan base-package="com.example.spring01" />
+   bean : 자바 클래스 인스턴스. 
+   - ~Controller.java에서 's'표시는 스프링에서 등록한 bean(자바 입장에서는 클래스 파일 == ~.java 소스파일).
+     spring bean은 해당 소스파일(~Controller.java)에서  @Controller Annotation 코드에 의해 spring bean으로 
+     등록이되서 was 실행시 메모리에 등록된다(HomeController). 
+     2일차 <9.>의 설명에 약간 디테일한 설명.
+   - @Controller : 컨트롤러 빈 // @Repository : dao(db 관련 작업) bean
+     @Service :서비스(비즈니스 로직) bean // @Inject :의존관계 주입
+
+3. @RequestMapping(value = "/", method = RequestMethod.GET)
+웹에 띄우면 localhost/spring01/ 이 된다. 마지막 '/'가 value = "/" 이며 그래서 
+home()가 호출 된다. Model-model 객체는 서블릿의 request.setAttribute이다.
+return "home"은 <9> 마지막 컨트롤러
+
+4. web.xml 에서
+root-context.xml 	=> 서블릿 이외의 설정(DBCP) , DB연결 설정
+servlet-context.xml	=> 서블릿만
+
+5. 의존 관계 == 결합 관계.
+tip) 싱글톤
+private Member() {}
+private static Member instance();
+public static Member getInstance() {
+	if(instance == null) {
+		instance = new Member();
+	}
+	return instance;
+}
+
+class Member() {
+  private Member() {}
+}
+
+public class MemberUse() {
+	// 느스한 결합 관계.
+	// 의존 관계 주입. (Dependency Injection=DI)
+  @Inject << 이 애노테이션이 spring에서 Memer 인스턴스(bean)를 만들어서[설정] 주입 해준다는 의미. 
+	// 그래서, 객체 생성, 소멸(라이프사이클 관리를 spring에서 해준다 IOC[제어역전])
+	// 객체에 대한 제어권이 개발자 -> 스프링으로 이동. IOC[제어역전]
+  public MemberUse(Member m) {
+
+	}
+
+	// 강한 의존 관계(강한 결합)
+  public MemberUse() {
+	Member m = new Member();
+	}
+}
+
+6. MVN repository 페이지 및 메이븐 빌드 에러시 해결 방법.
+
+- http://mvrepository.com
+- build path 에서 jdk 1.8버전 확인
+- project facets jdk 1.8 버전 확인.
+- pom.xml 에서 spring version 확인.
+- 메뉴 - Project - (해당 프로젝트) clean. // 
+   Servers(eclipse 오른쪽 servers 아이콘의 등록된 was 우클릭)- clean tomcat work directory.
+   (package exploer의 servers가 아니다)
+- sts 종료 후 .m2 삭제 후 시작
+
+7. 로깅툴
+- 로깅툴을 사용하는 이유; sysout 명령어는 IO 리소스를 많이 사용하여 시스템이 느려질 수 있음.
+  로그를 파일로 저장하여 분설할 필요가 있음.
+- 로깅툴 종류
+  -- commons-logging: 스프링 3에서 사용하던 로깅툴.
+  -- log4j : 효율적인 메모리 관리로 그 동안 많이 사용되었음.
+  -- logback : log4j 보다 성능이 우수하여 최근에 많이 사용되고 있음.
+  -- SLF4J : logback을 사용하기 위한 인터페이스.
+	pom.xml 에서 <slf4j-version> 설정(윗줄에 있음)
+	<org.slf4j-version>1.7.25</org.slf4j-version>
+  -- 이외에도 <!-- Logging --> <!-- logback 로깅 관련 --> line 97 (pom.xml)
+  -- src/main/resource 에 logback.xml 설정
+  -- 코드; private static final Logger LOGGERS = LoggerFactory.getLogger(클래스이름.class);	
+     코드; 해당 메서드에서 LOGGERS.info("로그타이틀", 출력 값);
+
+8. oracle 연결 설정 및 테스트.
+- sqlplus /as sysdba;
+
+예제로 배우는 oracle 11g
+https://wikidocs.net/book/550 
+자바 입문서
+https://wikidocs.net/book/31
+Maven 정복
+https://wikidocs.net/book/1910
+Git 좀 잘 써보자
+https://wikidocs.net/book/1902
+https://wikidocs.net/book/1382
+리눅스(CentOS) - 개발 놀이터 만들기
+https://wikidocs.net/book/1832
+우분투
+https://wikidocs.net/book/1002
+코드, 패턴 그리고 소프트웨어
+https://wikidocs.net/book/55
+
+https://wikidocs.net/
+
+
+** oracle 12c버전의 경우 11g와 호환하기 위해 서
+alter session set "_ORACLE_SCRIPT"=true;
+
+create tablespace spring
+datafile 'd:\work\spring.dbf' size 50
+autoextend on
+next 10m
+maxsize unlimited;
+
+create user spring identified by 1234
+default tablespace spring;
+
+grant connect,resource,dba to spring;
+/////////////////////////////////////////////////////////////////////////////////
+테스트 코드(junit test case - New junit 4 test 이용) src/test/java 
+**이런 테스트코드는 안된다. 정보가 다 드러나 있기때문에. root-context.xml에서 설정**
+
+package com.example.spring01;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class OracleConnectionTest {
+	private static final Logger LOGGERS = 		
+				LoggerFactory.getLogger(OracleConnectionTest.class);
+	private static String DRIVER = 
+				"oracle.jdbc.driver.OracleDriver";
+	private static String URL = 
+				"jdbc:oracle:thin:@localhost:1521:orcl";
+	private static String USER = 
+				"spring";
+	private static String PWD = 
+				"1234";
+	
+	@Test
+	public void test() throws Exception{
+		Class.forName(DRIVER);
+		try (Connection conn = DriverManager.getConnection(URL, USER, PWD)) {
+			LOGGERS.info("Oracle 연결 성공");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}
+/////////////////////////////////////////////////////////////////////////////////
+- <bean id="참조변수" 	class="자료형(타입),객체">
+  <bean id="str" 	class="String"> => String str = new String();
+
+(root-context.xml)에 있다.
+-<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
+ DriverSpy; 쿼리 실행시 로그에 남는다.
+	
+<property name="url" value="jdbc:log4jdbc:oracle:thin:@localhost:1521:orcl" />
+log4jdbc; 실행시 로그에 남게하는 인터페이스
+
+
+-sqlSessionTemplate : sqlSession 객체 생성
+<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache">
+
+sqlSessionFactoryBean : sqlSessionTemplate 객체 생성
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+
+DriverManagerDataSource : DB연동 클래스
+<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+
+ 결국 -> DriverManagerDataSource -> SqlSessionFactoryBean - > SqlSessionTemplate -> sqlSession
+(root-context.xml - Bean graph에서 의존 관계 확인.)
+	
+	root-context.xml 의 Beans Graph
+
+	sqlSession
+	sqlSessionTemplate(sqlSesionFactory)
+			↓
+			↓
+		sqlSessionFactory	
+			└ datasource			
+			└ configLocation
+			└ mapperLocation
+			↓
+			↓
+		dataSource
+			└ driverClassName
+			└ url
+			└ username
+			└ password
+
+- <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<property name="dataSource" ref="dataSource" />
+	<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+	-> value="classpath:/mybatis-config.xml" 는 
+	   Mybatis 설정 파일의 경로작성 ;src/main/resources -> mybatis-config.xml
+
+	<property name="mapperLocations" value="classpath:mappers/**/*Mapper.xml"></property>
+	->value="classpath:mappers/**/*Mapper.xml" 는
+	  Mybatis mapper 파일의 경로 ; src/main/resources/mappers -> sampleMapper.xml
+	-> **는 하위디렉토리도 있어도 된다.
+	-> *Mapper는 ~Mapper.xml 로 되어있는 xml파일.
+ </bean>
+
+ classpath; src/main/resource
+
+- spring legacy project (실무 ,구버전)
+  spring boot(신버전) 설정 최소화.
+
+9. MybatisTest (테스트 코드 작성)
+
+package com.example.spring01;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+// junit 4 버전으로 테스트
+@RunWith(SpringJUnit4ClassRunner.class)
+// 스프링 설정 파일 위치 셋팅.
+@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/spring/root-context.xml"})
+public class MybatisTest {
+	private static final Logger LOGGERS = LoggerFactory.getLogger(MybatisTest.class);
+	
+	//의존 주입
+	// SqlSessionFactory 이 root-context.xml에 bean으로 설정 되어있다.
+	@Inject
+	private SqlSessionFactory sqlFactory;
+	
+	@Test
+	public void testForFactory() {
+		 LOGGERS.info("sqlFactory : " + sqlFactory);
+	}
+	
+	@Test
+	public void testForSession() {
+		 try (SqlSession sqlSession = sqlFactory.openSession()) {
+			 LOGGERS.info("sqlSession : " + sqlSession + "\n mybatis 연결 성공");
+		 } catch (Exception e) {
+			 e.printStackTrace();
+		 }
+	}
+
+}
+
+10. Controller와 view 연결
+- src/main/java -> com.example.spring01.controller(패키지 생성)
+  (MainController.java)
+*실행시 기존 HomeController와 doGet과 겹치면 에러가 나무로 home() 주석 처리.
+
+package com.example.spring01.controller;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class MainController {
+	private static final Logger  LOGGERS = LoggerFactory.getLogger(MainController.class);
+	
+	@RequestMapping("/")
+	public String main(Model model) {
+		model.addAttribute("message", "홈페이지 방문을 환영합니다.");
+		return "main";
+	}
+}
+
+- src/main/webapp/WEB-INF/views/main.jsp (생성)
+...
+
+<body>
+ <h2>${message}</h2>
+</body>
+
+
+...
+
+was 실행 후 웹에서 확인
+http://localhost:8080/spring01/
+
+11. 구구단 만들어 보기
+- src/main/webapp/WEB-INF/views -> include 폴더 생성
+  include-> header.jsp // menu.jsp // jquery-3.2.1.min.js 생성
+
+-> header.jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+ <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+ <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+ 
+ <c:set var="path" value="${pageContext.request.contextPath}"/>
+ <script src="../include/jquery-3.2.1.min.js" > </script>
+ <!-- <script src="https: //code.jquery.com/jquery-3.3.1.min.js" > </script> -->
+
+-> menu.jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+ <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+  <c:set var="path" value="${pageContext.request.contextPath}"/>
+  
+  <div style="text-align: center;">
+  	<a href="${path}/">main</a>
+  	<a href="${path}/gugu.do">gugu-dan</a>
+  	<a href="${path}/test.do">test</a>
+  	<a href="${path}/member/list.do">managed registration</a>
+  </div>
+  <hr>
+
+-> 기존 views->main.jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="include/header.jsp" %>  <<
+</head>
+<body>
+<%@ include file="include/menu.jsp" %>  <<
+<h2>${message}</h2>
+</body>
+</html>
+
+- 기존 MainController.java -1
+...
+
+@RequestMapping("gugu.do") // menu.jsp의 <a href="${path}/gugu.do">gugu-dan</a>
+	public String gugu(Model model) {
+		int dan = 7;
+		String result ="";
+		for (int i =1; i<=9; i++) {
+			result += dan + " x " + i + " = " + (dan * i) +"<br>";
+		}
+		
+		model.addAttribute("result", result);
+		return "test/gugu";
+	}
+
+-> views/test 폴더 생성 후 gugu.jsp 생성
+ gugu.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %> <<
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %> <<
+<h2>${result}</h2>
+</body>
+</html>
+
+
+- 기존 MainController.java -2
+@RequestMapping("gugu.do")
+	public String gugu(Model model,@RequestParam(defaultValue="2") int dan) { //code fixed
+		//int dan = 7;
+		String result ="";
+		for (int i =1; i<=9; i++) {
+			result += dan + " x " + i + " = " + (dan * i) +"<br>";
+		}
+		
+		model.addAttribute("result", result);
+		return "test/gugu";
+	}
+
+-------------------------------------------------------------------------------- 
+

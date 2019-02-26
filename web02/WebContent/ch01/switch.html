@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+	<script>
+		var season = prompt("좋아하는 계절을 한글로 입력해주세요.", "봄");
+		var message = "";
+		var img = "";
+		switch(season) {
+		case "봄" : message = "You like season to the Spring. pink season! "; img ="spring.jpg"; break;
+		case "여름" : message = "You like season to the Summer. bule season! "; img ="summer.jpg"; break;
+		case "가을" : message = "You like season to the Autumn. red season! "; img ="autumn.jpg"; break;
+		case "겨울" : message = "You like season to the Winter. white season!"; img= "winter.jpg"; break;
+		default : alert("You write incorrect seanson voca");  
+		}
+		document.write("<h2>" + message + "</h2>");
+		document.write("<img src = '../images/" + img + "'>");
+	 
+		
+	</script>
+</head>
+<body bgcolor="pink">
+	
+</body>
+</html>

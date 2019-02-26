@@ -1,0 +1,11 @@
+computeSourcePath=true
+contextsDir=C\:\\Program Files\\ApacheSoftwareFoundation\\apache-tomcat-9.0.14\\conf\\Catalina\\localhost
+eclipse.preferences.version=1
+managerPassword=1234
+managerUrl=http\://localhost\:8080/manager
+managerUser=admin
+projectsInSourcePath=spring01;
+tomcatConfigFile=C\:\\Program Files\\ApacheSoftwareFoundation\\apache-tomcat-9.0.14\\conf\\server.xml
+tomcatDir=C\:\\Program Files\\ApacheSoftwareFoundation\\apache-tomcat-9.0.14
+tomcatJRE=1547956210433
+tomcatVersion=tomcatV9

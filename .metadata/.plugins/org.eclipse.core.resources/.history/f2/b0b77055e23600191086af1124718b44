@@ -1,0 +1,59 @@
+package com.example.spring01.model.dao;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Repository;
+
+import com.example.spring01.model.dto.MemberDTO;
+
+@Repository
+public class MemberDAOImpl implements MemberDAO {
+	
+	@Inject
+	SqlSession sqlSession;
+	
+	@Override
+	public List<MemberDTO> listMember() {
+		return sqlSession.selectList("member.memberList");
+	}
+
+	@Override
+	public void insertMember(MemberDTO dto) {
+		sqlSession.insert("member.memberInsert", dto);
+	}
+
+	@Override
+	public MemberDTO viewMember(String userid) {
+		return sqlSession.selectOne("member.memberView", userid);
+	}
+
+	@Override
+	public void deleteMember(String userid) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateMember(MemberDTO dto) {
+		sqlSession.update("member.memberUpdate",dto);
+	}
+
+	@Override
+	public boolean checkPwd(String userid, String passwd) {
+		boolean result = false;
+		
+		Map<String, String> map = new HashMap<>();
+		map.put("userid", userid);
+		map.put("passwd", passwd);
+		
+		int count = sqlSession.selectOne("member.checkPw",map);
+		
+		return result = (count == 1) ? true : false;
+	}
+
+}

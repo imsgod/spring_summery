@@ -1,0 +1,71 @@
+ <script src="${path}/include/jquery-3.2.1.min.js"></script>
+-----------------------------------------------------------------
+<br><a href="#" onclick="doF()">doE</a><br>
+	
+<div id="result"></div>
+
+<script>
+function doF() {
+	$.ajax({
+		type : "post",
+		url : "${path}/test/doF",
+		success: function(result) {	 
+			$("#result").html("상품명 : " + result.name +
+							 ",가격 : " + result.price);
+		}
+	});	
+}
+</script>
+
+@ResponseBody
+@RequestMapping("test/doF")
+public ProductDTO doF() {
+		return new ProductDTO("냉장고",550000);
+	}
+
+-----------------------------------------------------------------
+<input type="button" value="수정" id="btnUpdate"> 
+
+<input type="button" value="삭제" id="btnDelete">
+
+ <script>
+ 	$(function(){
+ 		$("#btnUpdate").click(function(){
+ 			document.form1.action="${path}/member/update.do";
+ 			document.form1.submit();
+ 		});
+ 		
+ 		$("#btnDelete").click(function(){
+ 	 		if(confirm("삭제 하시겠습니까?")) {
+ 	 			document.form1.action= "${path}/member/delete.do";
+ 	 			document.form1.submit();
+ 	 		}
+ 	 	});
+ 	}); 
+ </script>
+-----------------------------------------------------------------
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script>
+	google.load("visualization", "1", {
+		"packages" : ["corechart"]
+	});
+	google.setOnLoadCallback(drawChart);
+	function drawChart() { 
+		var jsonData=$.ajax({
+			url : "${path}/json/sampleData.json",
+			dataType : "json",
+			async : false
+		}).responseText;
+		console.log(jsonData);
+		
+		var data = new google.visualization.DataTable(jsonData);
+		var chart = new google.visualization.PieChart(
+								document.getElementById("chart_div"));
+			chart.draw(data,{
+				title : "차트 예제",
+				width : 600,
+				height : 400
+			});
+	}
+</script>

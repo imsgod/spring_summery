@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+	<script>
+			function test(x,y) {
+			 	 document.write(typeof(x) + ", " + typeof(y) + "<br>");
+			 	 x = parseInt(x);
+			 	 y = parseInt(y);
+			 	 
+			 	document.write(x + y + "<br>");
+			 	document.write(x - y + "<br>");
+			 	document.write(x * y + "<br>");
+			 	document.write(x / y + "<br>");
+			 } 
+			 
+				
+	</script>
+</head>
+<body>
+
+<form name="f">
+	a <input type="text" name = "a" size = "10">
+	b <input type="text" name = "b" size = "10"> 
+	<br>
+	<input type="button" value = "summary" 
+			onclick="test(document.f.a.value, document.f.b.value)">
+</form>
+
+</body>
+</html>

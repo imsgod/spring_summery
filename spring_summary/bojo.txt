@@ -1,0 +1,30 @@
+- com.example.spring02.controller.memo - > MemoController (기존)
+
+
+
+- com.example.spring02.model.memo.dao -> MemoDAO(기존)
+
+
+
+- com.example.spring02.service.memo -> MemoServiceImpl (기존)
+
+
+
+- src\main\webapp\WEB-INF\views\memo -> view(jsp 생성)
+
+
+- src\main\webapp\WEB-INF\views\include -> menu(기존)
+
+
+dto
+
+private int idx;
+	private String writer, memo;
+	private Date post_date;
+
+service
+public List<MemoDTO> list();
+	public void insert(MemoDTO dto);
+	public MemoDTO memo_view(int idx);
+	public void delete(int idx);
+	public void update(MemoDTO dto);

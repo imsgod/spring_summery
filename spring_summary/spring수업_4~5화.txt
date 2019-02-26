@@ -1,0 +1,1277 @@
+4화
+--------------------------------------------------------------------------------
+1. test.do(클라이언트화면) =>web.xml -> MainController.java => test.jsp
+서블릿 -> DefaultServlet => (개량) DispatcherServlet - >servlet-context.xml -> test.jsp
+	(  test.do )			(MainController 매핑확인)
+
+- MainController.java (기존) 에서 test() 생성
+....
+@RequestMapping("test.do")
+public void test() {
+
+}
+
+@RequestMapping("test/doA")
+	public String doA(Model model) {
+		//자료저장
+		model.addAttribute("message", "홈페이지 환영 합니다.");
+		//포워딩
+		return "test/doA";
+}
+
+@RequestMapping("test/doB") 
+	public void doB(){
+		LOGGERS.info("doB..calling~");
+	}
+
+@RequestMapping("test/doC")
+	public ModelAndView doC() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("proudct", new ProductDTO("샤프",1000));
+		// new ModelAndView("페이지 이름", "변수", 값);
+		return new ModelAndView("test/doc","map",map);
+}
+
+@RequestMapping("test/doD")
+	public String doD() {
+		return "redirect:/test/doE";
+	}
+	
+@RequestMapping("test/doE")
+	public void doE() {}
+
+	
+@ResponseBody //dto를 json으로 변환 (변환기 :jackson-databind mvn추가)
+@RequestMapping("test/doF")
+	public ProductDTO doF() { //뷰를 리턴하는 거이 아닌 데이터만을 (비동기식으로) 리턴할 경우.
+		return new ProductDTO("냉장고", 550000);
+	}
+
+test() 시그니처가 리턴 타입이 public String 이면 return "test"; 이라면 test.jsp 포워딩 해라.
+ 그런데, 시그니처 리턴 타입이 public void 이면 자동으로 메서드 이름과 같은 페이지로 포워딩 하라는 뜻이다.
+차이는 String 타입 일때는 return "";시 포워딩 할 수 있는 페이지로 정할 수 있다. (수동적)
+       void 타입일때는 그냥 return 없이 메서드이름(여기서는 test() )으로 자동으로 포워딩 된다. (능동적)
+
+- src/main/webapp/WEB-INF/views 에 test.jsp(생성)
+...
+<title>Insert title here</title>
+<%@ include file="include/header.jsp" %>
+</head>
+<body>
+<%@ include file="include/menu.jsp" %>
+<h2> link test</h2>
+<a href="${path}/test/doA">doA</a>
+<a href="${path}/test/doB">doB</a>
+<a href="${path}/test/doC">doC</a>
+<a href="${path}/test/doD">doD</a>
+<a href="#" onclick="doF()">doE</a>
+
+<div id="result"></div>
+</body>
+</html>
+
+- src/main/webapp/WEB-INF/views/test 에 doA.jsp(생성)
+...
+<title>Insert title here</title> 
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+<h2>doA page</h2>
+<h2>${message}</h2>
+</body>
+</html>
+
+- src/main/webapp/WEB-INF/views/test 에 doB.jsp(생성)
+...
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+	<h2>doB page</h2>
+	<%@ include file="../include/menu.jsp" %>
+</body>
+</html>
+
+- src/main/java -> com.example.spring01.model.dto (패키지 생성)
+->ProductDTO.java (생성)
+
+package com.example.spring01.model.dto;
+
+public class ProductDTO {
+	private String name;
+	private double price;
+	//getter, setter, toSring, basic Constructor & field Constructor
+	
+	public ProductDTO() {}
+	
+	public ProductDTO(String name, double price) {
+ 		this.name = name;
+		this.price = price;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public double getPrice() {
+		return price;
+	}
+	public void setPrice(double price) {
+		this.price = price;
+	}
+	@Override
+	public String toString() {
+		return "ProductDTO [name=" + name + ", price=" + price + "]";
+	}
+	
+}
+
+- src/main/webapp/WEB-INF/views/test 에 doC.jsp(생성)
+...
+<title>Insert title here</title>
+ 
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<h2> doC Page</h2>
+<%@ include file="../include/menu.jsp" %>
+<h2> 상품명 : ${map.product.name}</h2>
+<h2> 상품명 : ${map.product.price}</h2>
+</body>
+</html>
+
+- src/main/webapp/WEB-INF/views/test 에 doE.jsp(생성); doD는 리다이렉트 되서 doE로 포워딩.
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+<h2>doE페이지</h2>
+
+복습 	
+forward	 주소 그대로, 화면 이동, 데이터 전달. spring에서는 void나 String, ModelAndView를 사용(디폴트 느낌)
+redirect 주소 변경, 화면 이동, get방식의 소량의 데이터 String return "redirect:주소";
+
+
+-views/test.jsp(기존)
+...
+<title>Insert title here</title>
+<%@ include file="include/header.jsp" %>
+//비동기적인 방식으로 처리(백그라운드에서 처리)
+<script>	<< 스크립트 추가
+function doF() {
+	$.ajax({
+		type : "post",
+		url : "${path}/test/doF",
+		success: function(result) {	 
+			$("#result").html("상품명 : " + result.name +
+							 ",가격 : " + result.price);
+		}
+	});	
+}
+</script>
+</head>
+<body>
+<%@ include file="include/menu.jsp" %>
+...
+
+- $ is not defined = > jquery include 인식이 안된다.  DispatchServlet이 인식하지만 사용하지 못한다.
+js, css, png등의 파일들(resources)은 => src/main/resouces에서 처리해야된다!!!
+
+src\main\webapp\WEB-INF\spring\appServlet\servlet-context.xml에서
+<resources mapping="/resources/**" location="/resources/" /> 
+-> 리소스의 매핑 location="/resources/"(src/main/webapp/resouces 폴더안에 파일들(resources)넣으면 된다.
+
+<resources mapping="/include/**" location="/WEB-INF/views/include/" />
+->수업관계상 여기로 설정  후 WAS 재시작.
+
+-views/include header.jsp(기존)
+ <script src="include/jquery-3.2.1.min.js" > </script> 아래 코드로 바꾼다.
+ <script src="${path}/include/jquery-3.2.1.min.js" > </script>
+
+-mvnrepository.com에서 라이브러리 추가 json형태로 해야된다.(doF())
+jackson-databind <<라이브러리 이름. (version : 2.9.4)
+pom.xml에서  <dependencies> line23 아래에 복사한거 추가.
+
+<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.9.4</version>
+</dependency>
+
+-- json으로 데이터 찍으면(console.log(result))
+{name : "냉장고", price: 50000}
+DTO를 controller에서 리턴(productDTO 클래스); 그러면 다양한 타입 Arraylist,hashmap등의 타입을 
+public 타입 메서드명() {...} << 이런 시그니처를써서 컨트롤러에 코딩하고,
+jsp페이지에서는 json으로 받으면 된다. 그때 사용되는 애노테이션이 
+@ResponseBody 이다.(정확히는 dto를 json으로 변환)[이 애노테이션이 사용될려면 jackson-databain 라이브러리가 필요]
+
+-- @RestController //스프링 4.x 부터 사용가능 // 구버전이 실무에 많아서 호환상 바로 위의 것을 사용한다.
+->src\main\java\com\example\spring01\controller -> SampleRestController.java (생성)
+-> SampleRestController.java
+
+package com.example.spring01.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.spring01.model.dtoA.ProductDTO;
+
+//spring 4.0 부터 사용 가능
+// 뷰를 리턴 하는것이 아닌 json 데이터만 리턴
+// MainController의 doF()차이는 호환성과 애노테이션(@RestController)를 붙이고 해당 메서드에서 @ResponseBody제거
+@RestController
+public class SampleRestController {
+	@RequestMapping("test/doF") // MainController doF() 테스트시 하나는 주서처리
+	public ProductDTO doF() { //뷰를 리턴하는 거이 아닌 데이터만을 (비동기식으로) 리턴할 경우.
+		return new ProductDTO("냉장고", 550000);
+	}
+}
+
+2. MainControllerTest(생성) 테스트 케이스
+팁) 해당콘트롤러(MainController) 선택 후 ctrl + n -> junit test case 하면 name에 ~Test가 템플릿 생성되고 
+-> next -> 테스트할 메서드들을 선택 후 -> fin
+
+package com.example.spring01.controller;
+
+import javax.inject.Inject;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MockMvcBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/spring/**/*.xml"})
+public class MainControllerTest {
+	@Inject
+	WebApplicationContext webApplicationContext;
+	
+	MockMvc mockMvc; // view 없이 콘트롤러 테스트
+	
+	@Before
+	public void setup() throws Exception {
+		// mvc 테스트를 위한 인스턴스 생성.
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+	}
+	
+	@Test
+	public void testMain() throws Exception{
+		mockMvc.perform(MockMvcRequestBuilders.get("/"));
+	}
+
+	@Test
+	public void testGugu() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/gugu.do"));
+	}
+
+	@Test
+	public void testTest() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/test.do"));
+	}
+
+	@Test
+	public void testDoA() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/test/doA"));
+	}
+
+	@Test
+	public void testDoB() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/test/doB"));
+	}
+
+	@Test
+	public void testDoC() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/test/doC"));
+	}
+
+	@Test
+	public void testDoD() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/test/doD"));
+	}
+
+	@Test
+	public void testDoE() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/test/doE"));
+	}
+
+	@Test
+	public void testDoF() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/test/doF"));
+	}
+
+}
+
+3. db 데이터 연결 (회원관리 예제)
+Controller	- MemberController, 
+Service		- MemberService,MemberServiceImpl,
+Model		- MemberDAO, MemberDAOImpl, MemberDTO, memberMapper
+View		- member_list, write,view
+
+Controller,DAO,Serivce = > 스프링 컨터이너(root-context)에서 관리.
+
+의존관계 구조
+MemberController -> memberSerivce -> memberdao -> sqlsession(rootcontext) -> memberMapper.xml(resorces)
+sqlsession(rootcontext)은 id와 사용측(dao 혹은 controller에서)에서 반드시 변수명을 일치 시켜주어야한다.
+ex) <bean id="sqlSession" ..... /> << root-context.xml
+
+memberDAOImple.java에서 
+@Incet
+SqlSession sqlSession
+
+id="sqlSession" 과 sqlSession 일치!
+
+
+sql) spring(tablespace) - member 테이블(생성)
+
+create table member (
+ userid varchar2(50) not null primary key,
+ passwd varchar2(50) not null,
+ name varchar2(50) not null,
+ email varchar2(50),
+ join_date date DEFAULT sysdate
+);
+
+insert into member values('kim','1234','김철수','kim@gamil.com',sysdate);
+
+select * from member;
+
+select count(*) from member
+where userid='kim' and passwd='2222';
+commit;
+
+- com.example.spring01.model.dto.MemberDTO(생성)
+
+package com.example.spring01.model.dto;
+
+import java.util.Date;
+
+public class MemberDTO {
+	private String userid, passwd, name, email;
+	private Date join_date; //java.util.Date;
+	
+	public String getUserid() {
+		return userid;
+	}
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+	public String getPasswd() {
+		return passwd;
+	}
+	public void setPasswd(String passwd) {
+		this.passwd = passwd;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public Date getJoin_date() {
+		return join_date;
+	}
+	public void setJoin_date(Date join_date) {
+		this.join_date = join_date;
+	}
+	
+	@Override
+	public String toString() {
+		return "MemberDTO [userid=" + userid + ", passwd=" + passwd + ", name=" + name + ", email=" + email
+				+ ", join_date=" + join_date + "]";
+	}
+	
+	public MemberDTO() {}
+	
+	
+}
+
+- com.example.spring01.controller -> MemberController (생성)
+
+package com.example.spring01.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class MemberController {
+	
+	@RequestMapping("member/list.do")
+	public String memberList(Model model) {
+		return "member/member_list";
+	}
+}
+
+
+- src/main/resources/mappers -> memberMapper.xml(생성)
+root-context에서 <property name="mapperLocations" value="classpath:mappers/**/*Mapper.xml"></property>
+셋팅이 맞는지 확인! **Mapper 라서 ~Mapper 패턴을 해야한다.
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="member"> <!-- sample -> member  -->
+
+	<select id="memberList" resultType="com.example.spring01.model.dto.MemberDTO">
+		select * from member
+		order by name
+	</select>
+	
+</mapper>
+
+
+- com.example.spring01.model.dao.MemberDAO (인터페이스 생성)
+ 
+package com.example.spring01.model.dao;
+
+import java.util.List;
+
+import com.example.spring01.model.dto.MemberDTO; 
+
+public interface MemberDAO {
+	public List<MemberDTO> memberList();
+	public void insertMember(MemberDTO dto);
+	public MemberDTO viewMember(String userid);
+	public void deleteMember(String userid);
+	public void updateMember(MemberDTO dto);
+	public boolean checkPw(String userid, String passwd);
+}
+
+- com.example.spring01.model.dao.MemberDAOImpl (생성)
+팁) 클래스 파일 위저드 상자에서 name: ~ 아래 interface - add(MemberDTO) 해주면 자동 생성 된다.
+
+package com.example.spring01.model.dao;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Repository;
+
+import com.example.spring01.model.dto.MemberDTO;
+
+// 이 클래스를 스프링에서 관리하는 dao bean 으로 설정. 싱글톤으로 등록
+@Repository
+public class MemberDAOImpl implements MemberDAO {
+	
+	// mybatis의 sqlSession 객체를 스프링에서 주입(DI)
+	@Inject
+	SqlSession sqlSession;
+	
+	@Override
+	public List<MemberDTO> memberList() {
+		return sqlSession.selectList("member.memberList");
+	}
+
+	@Override
+	public void insertMember() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public MemberDTO viewMember(String userid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override 
+	public void deleteMember(String userid) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateMember(MemberDTO dto) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public boolean checkPw(String userid, String passwd) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+}
+
+
+DI주입, IOC
+**** MemberController => MemberService(Imple) => MemberDAO(Impl),DTO => SqlSession => memberMapper.xml
+
+- com.example.spring01.serive.MemberService (인터페이스 생성) 
+package com.example.spring01.serivce;
+
+import java.util.List;
+
+import com.example.spring01.model.dto.MemberDTO;
+
+public interface MemberService {
+	public List<MemberDTO> memberList();
+	public void insertMember(MemberDTO dto);
+	public MemberDTO viewMember(String userid);
+	public void deleteMember(String userid);
+	public void updateMember(MemberDTO dto);
+	public boolean checkPw(String userid, String passwd);
+}
+
+- com.example.spring01.serice.MemberServiceImpl (생성)
+
+package com.example.spring01.serivce;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.example.spring01.model.dao.MemberDAO;
+import com.example.spring01.model.dto.MemberDTO;
+
+// 현재 클래스를 스프링에서 관리하는 service bean으로 설정.
+@Service
+public class MemberServiceImpl implements MemberService {
+	
+	//dao 인스턴스 주입. 인터페이스로 주입해준다. 이런개념 List list = new ArrayList();
+	// 그래서 MemberDAOImpl로 타입을 주어도 되지만, 느슨한 결합개념으로 interface - impl객체 연결 (다형성)
+	@Inject
+	MemberDAO memberDao;
+	
+	@Override
+	public List<MemberDTO> memberList() {
+		return memberDao.memberList();
+	}
+
+	@Override
+	public void insertMember(MemberDTO dto) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public MemberDTO viewMember(String userid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteMember(String userid) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateMember(MemberDTO dto) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public boolean checkPw(String userid, String passwd) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+}
+
+- com.example.spring01.controller.MemberController (기존)
+
+package com.example.spring01.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.example.spring01.model.dto.MemberDTO;
+import com.example.spring01.serivce.MemberService;
+
+@Controller
+public class MemberController {
+	
+	//MemberService 인스턴스 주입.
+	@Inject
+	MemberService memberService;
+	
+	@RequestMapping("member/list.do")
+	public String memberList(Model model) {
+		List<MemberDTO> list = memberService.memberList();
+		model.addAttribute("list", list); 
+		return "member/member_list";
+	}
+}
+
+
+- src\main\webapp\WEB-INF\views\member -> member_list.jsp (디렉토리 생성,jsp 생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+<table border="1" width="700px">
+	<tr>
+		<th>아이디</th>
+		<th>이름</th>
+		<th>이메일</th>
+		<th>가입일자</th>
+	</tr>
+	<c:forEach var="row" items="${list}">
+		<tr>
+			<td>${row.userid}</td>
+			<td>${row.name}</td>
+			<td>${row.email}</td>
+			<td>${row.join_date}</td>
+		</tr>
+	</c:forEach>
+</table>
+</body>
+</html>
+--------------------------------------------------------------------------------
+
+5화
+--------------------------------------------------------------------------------
+1. 날짜 형식 변경
+아이디	이름	이메일	가입일자
+kim	김철수	kim@gamil.com	Mon Jan 28 03:04:15 KST 2019 << 날짜 형식 변경
+
+- src\main\webapp\WEB-INF\views\member -> member_list.jsp (기존)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+<input type="button" value="회원 등록" onclick="location.href='${path}/member/write.do'"> <br><br> << 버튼
+<table border="1" width="700px">
+	<tr>
+		<th>아이디</th>
+		<th>이름</th>
+		<th>이메일</th>
+		<th>가입일자</th>
+	</tr>
+	<c:forEach var="row" items="${list}"> 
+		<tr>
+			<td>${row.userid}</td>
+			<td>${row.name}</td>
+			<td>${row.email}</td>
+			<td><fmt:formatDate value="${row.join_date}"
+					    pattern="yyyy-MM-dd HH:mm:ss"/> << 날짜 형식 추가
+			</td>
+		</tr>
+	</c:forEach>
+</table>
+</body>
+
+
+</html>
+</html>
+
+2. 추가 버튼(insert)
+- src\main\webapp\WEB-INF\views\member\ -> write.jsp(생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+<h2>write 페이지 회원 등록</h2> <br>
+	<form name ="form1" method="post" action="${path}/member/insert.do">
+		<table border="1" width="400px">
+			<tr>
+				<td>아이디  </td>
+				<td><input name="userid"> </td>
+			</tr>
+			<tr>
+				<td>비밀 번호</td>
+				<td><input type="password" name="passwd"></td>
+			</tr>
+			<tr>
+				<td>이메일</td>
+				<td><input name="email"></td>
+			</tr>			
+			<tr>
+				<td colspan="2" align="center">
+					<input type="submit" value="확인">
+				</td>
+			</tr>
+		</table>
+	</form>
+
+</body>
+</html>
+
+- com.example.spring01.controller -> MemberController(기존)
+
+package com.example.spring01.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.example.spring01.model.dto.MemberDTO;
+import com.example.spring01.service.MemberService;
+
+@Controller 
+public class MemberController {
+	
+	@Inject
+	MemberService memberService;
+	
+	@RequestMapping("member/list.do")
+	public String memberList(Model model) {
+		List<MemberDTO> list = memberService.memberList();
+		model.addAttribute("list", list);
+		return "member/member_list";
+	}
+	
+	@RequestMapping("member/write.do") << 폼 controller 추가된 write.jsp 경로
+	public String write() {
+		return "member/write";
+	}
+	
+	// @ModelAttribute : 폼에서 전달된 값을 저장하는 객체.
+	@RequestMapping("member/insert.do") //param 에 dto객체를 시그니처만 해도 데이터가 쌓인다. 헐;;;
+	public String insert(@ModelAttribute MemberDTO dto) {  << insert.jsp 경로
+
+		LOGGGERS.info("MemberDTO 객체 확인(이름,아이디) : " + dto.getName() + 
+									", " + 
+									dto.getUserid());
+		memberService.inserMember(dto);
+		return "redirect:/member/list.do";
+	}
+}
+
+참고)	public String gugu(Model model,@RequestParam(defaultValue="2") int dan) { ... } 
+	public String insert(@ModelAttribute MemberDTO dto) { .. }
+@RequestParam,@ModelAttribute 은 둘다 값을 받는 애노테이션이지만, 차이는 한개를 받느냐와 여러개를 받느냐 이다.
+둘다 알아 놓자. 거의 @modelAttribute를 사용하지만 트랜잭션등과 같은 현상때문에 값이 안 받아질때나 그 정도가 심해
+질때는 한개씩 받아야 한다.
+(ex) public String insert(@RequestParam String userid(dto필드명과 같아야한다 주의!),
+			  @RequestParam String name, 
+			  @RequestParam String email,
+			  @RequestParam String passwd, ....)
+{ dto객체를 받아야 한다.}
+
+- src\main\resources\mappers\memberMapper.xm (기존)
+insert문 작성.
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="member">
+	...
+	
+	<insert id="insertMember">
+			insert into member (userid, passwd, name, email)
+			values
+			(#{userid}, #{passwd}, #{name}, #{email})
+	</insert>
+</mapper> 
+
+insert.do 프로세스 확인!
+insert.do => (servlet-context,root-context..) MemberContoller -> MemberService,~Impl
+		=> MemberDAO,~Imple => memberMapper.xml(insert문 확인) 
+
+팁) F3키는 소스 코드 보기, F4키는 계층 구조 보기
+
+- src\main\java\com\example\spring01\service -> MemberServiceImpl (기존)
+
+package com.example.spring01.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.example.spring01.model.dao.MemberDAO;
+import com.example.spring01.model.dto.MemberDTO;
+
+@Service << 확인
+public class MemberServiceImpl implements MemberService {
+	
+	@Inject
+	MemberDAO memberDao;
+	
+
+	@Override
+	public List<MemberDTO> memberList() {
+		return memberDao.memberList();
+	}
+
+	@Override
+	public void inserMember(MemberDTO dto) {
+		memberDao.insertMember(dto); << 확인
+	}
+
+	...
+}
+
+- src\main\java\com\example\spring01\model\dao -> MemberDAOImpl (기존)
+
+package com.example.spring01.model.dao;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Repository;
+
+import com.example.spring01.model.dto.MemberDTO;
+
+@Repository << 확인
+public class MemberDAOImpl implements MemberDAO {
+	
+	@Inject
+	SqlSession sqlSession;
+	
+	@Override
+	public List<MemberDTO> memberList() {
+		return sqlSession.selectList("member.memberList"); //mapper.xml의 namespace.select id
+	}
+
+	@Override
+	public void insertMember(MemberDTO dto) {
+		sqlSession.insert("member.insertMember", dto); <<  //mapper.xml의 namespace.insert id
+	}
+	...
+}
+
+3. 목록상세와 수정  update
+
+- src\main\webapp\WEB-INF\views\member -> member_list.jsp (기존)
+
+...
+<c:forEach var="row" items="${list}"> 
+		<tr>
+			<td>${row.userid}</td>
+			<%--<td>${row.name}</td> << 상세(이름 하이퍼링크) -> 수정, 삭제 --%>
+			 
+			<td>
+			<a href="${path}/member/view.do?userid=${row.userid}">
+					${row.name}
+				</a>
+			</td>
+			<td>${row.email}</td>
+			<td> <fmt:formatDate value="${row.join_date}"
+					pattern="yyyy-MM-dd HH:mm:ss"/>
+			
+			</td>
+		</tr>
+	</c:forEach>
+</table>
+</body>
+</html>
+
+- src\main\java\com\example\spring01\controller -> MemberController (기존)
+
+	...
+	@RequestMapping("member/insert.do")
+	public String insert(@ModelAttribute MemberDTO dto) {
+		memberService.inserMember(dto);
+		return "redirect:/member/list.do";
+	}
+	
+	@RequestMapping("member/view.do") << 코드 추가
+	public String view(@RequestParam String userid, Model model) {
+		model.addAttribute("dto", memberService.viewMember(userid));
+		return "member/view";
+	}
+}
+
+- src\main\java\com\example\spring01\service -> MemberServiceImpl (기존)
+
+	...
+	@Override
+	public MemberDTO viewMember(String userid) {
+		return memberDao.viewMember(userid);  
+	}
+
+- src\main\java\com\example\spring01\model\dao - MemberDAOImp (기존)
+
+	...
+	@Override
+	public MemberDTO viewMember(String userid) {
+		// 레코드 1개 : selectOne(), 2개 이상: selectList()
+		return sqlSession.selectOne("member.viewMember", userid);
+	}
+
+- src\main\resources\mappers -> memberMapper (기존)
+
+	...
+	<select id="viewMember"
+			resultType="memberDto">
+			select *
+			  from member
+			 where userid = #{userid}
+	</select>
+
+팁) resultType="com.example.spring01.model.dto.MemberDTO" << 길기 때문에 
+src\main\resources\mybatis-config (기존) 에 aliases에 alias 추가
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<typeAliases> <<추가
+		<typeAlias type ="com.example.spring01.model.dto.MemberDTO"
+				  alias = "memberDto" />
+	</typeAliases>
+
+</configuration>
+
+- src\main\webapp\WEB-INF\views\member -> view.jsp(생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+
+ <script> << 추가
+ 	$(function(){
+ 		$("#btnUpdate").click(function(){
+ 			document.form1.action="${path}/member/update.do";
+ 			document.form1.submit();
+ 		});
+ 	});
+ </script>
+
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+	<h2>회원정보 수정</h2>
+	<form name="form1" method="post" >
+		<table border="1" width="400">
+			<tr>	 
+				<td>아이디</td>
+				<td><input name="userid" value="${dto.userid}">
+			</td>
+			</tr>
+			<tr>	
+				<td>비밀번호</td>
+				<td><input type="password" name="passwd"></td>
+			</tr>
+			<tr>	
+				<td>이름</td>
+				<td><input name="name" value="${dto.name}"></td>
+			</tr>
+			<tr>	
+				<td>이메일</td>
+				<td><input name="email" value="${dto.email}"></td>
+			</tr>
+			<tr>
+				<td>가입 날짜</td>
+				<td>
+					<fmt:formatDate value="${dto.join_date}"
+									pattern="yyyy-MM-dd"/>
+					
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center">
+					<input type="button" value="수정" id="btnUpdate">
+					<input type="button" value="삭제" id="btnDelete">
+					<div style="color: red;">${message}</div>
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</html>
+
+- src\main\java\com\example\spring01\controller -> MemberController (기존)
+
+	...
+	@RequestMapping("member/update.do")
+	public String update(@ModelAttribute MemberDTO dto, Model model) {
+		// 회원정보 수정
+		memberService.updateMember(dto);
+		// 수정 후 목록 이동
+		return "redirect:/member/list.do";
+	}
+	
+
+- src\main\java\com\example\spring01\service -> MemberServiceImpl (기존)
+	...
+	@Override
+	public void updateMember(MemberDTO dto) {
+		memberDao.updateMember(dto);
+	}
+
+
+- src\main\java\com\example\spring01\model\dao - MemberDAOImpl (기존)
+
+	...
+	@Override
+	public void updateMember(MemberDTO dto) {
+		sqlSession.update("member.updateMember", dto);
+	}
+	
+
+- src\main\resources\mappers -> memberMapper (기존)
+	...
+	<update id="updateMember">
+	 		update member
+	 		   set passwd = #{passwd}, name = #{name}, email = #{email}
+	 		 where userid = #{userid}
+	</update>
+
+팁) 상세정보 후 수정 할때 아이디는 not null 이므로 passwd, name, email만 수정 해야한다.
+이럴때 아래와 같이 view에 아이디 부분에 input 태그에서 property 중 'readonly' 코드 추가
+'readonly' => 읽기 전용
+
+- src\main\webapp\WEB-INF\views\member -> view.jsp(기존)			
+			....
+			<tr>	 
+				<td>아이디</td>
+				<td><input name="userid" value="${dto.userid}" readonly></td>
+			</tr>
+			<tr>	
+				<td>비밀번호</td>
+				<td><input type="password" name="passwd"></td>
+			</tr>
+			<tr>	
+				<td>이름</td>
+				<td><input name="name" value="${dto.name}"></td>
+			</tr>
+
+- src\main\java\com\example\spring01\controller -> MemberController (기존)
+
+	...
+	@RequestMapping("member/update.do")
+	public String update(@ModelAttribute MemberDTO dto, Model model) {
+		// 회원정보 수정
+		memberService.updateMember(dto);
+		// 수정 후 목록 이동
+		return "redirect:/member/list.do";
+	}
+
+- src\main\java\com\example\spring01\service -> MemberServiceImpl (기존)
+
+	...
+	@Override
+	public boolean checkPw(String userid, String passwd) {
+		return memberDao.checkPw(userid, passwd);
+	}
+
+
+- src\main\java\com\example\spring01\model\dao - MemberDAOImpl (기존)
+	
+	....
+	@Override 
+	public boolean checkPw(String userid, String passwd) {
+		boolean result = false;
+		
+		Map<String, String> map = new HashMap<>();
+		map.put("userid", userid);
+		map.put("passwd", passwd);
+		
+		int count = sqlSession.selectOne("member.checkPw", map);
+		
+		return result = (count == 1) ? true : false;
+	}
+
+- src\main\resources\mappers -> memberMapper (기존)
+	...
+	<!-- 비밀번호 채크  -->
+	<select id="checkPw" resultType="int">
+			select count(*)
+			  from member
+			 where userid = #{userid} and passwd = #{passwd}
+	</select>
+
+-- 사용자 비밀번호 확인 count : corr : 1 // icorr : 0 
+select count(*) from member
+where userid='im' and passwd='1234';
+
+select count(*) from member
+where userid='im' and passwd='5555';
+
+- src\main\webapp\WEB-INF\views\member -> view.jsp(기존) ********* join_date 안됫음.! ********* 
+
+팁) 4XX 에러시 - 클라이언트 에러 / 5XX 에러시 서버측 에러
+		
+		...
+		<tr>
+				<td>가입 날짜</td>
+				<td>
+					<c:if test="${join_date !=null }">
+						<fmt:formatDate value="${dto.join_date}"
+										pattern="yyyy-MM-dd"/>
+					</c:if>
+					 <fmt:formatDate value="${dto.join_date}"
+										pattern="yyyy-MM-dd"/>
+					
+				</td>
+			</tr>
+
+- src\main\java\com\example\spring01\controller -> MemberController (기존)
+
+@RequestMapping("member/update.do")
+	public String update(MemberDTO dto,  Model model) {
+		boolean result = memberService.checkPw(dto.getUserid(), dto.getPasswd());
+		if(result) {
+		// 회원정보 수정
+		memberService.updateMember(dto);
+		// 수정 후 목록 이동
+		return "redirect:/member/list.do";
+		} else { 
+			model.addAttribute("dto", dto);
+			model.addAttribute("join_date", << 추가
+					memberService.viewMember(dto.getUserid()).getJoin_date()); <<추가
+			model.addAttribute("message", "비밀번호를 확인해 주세요.");
+			return "member/view";
+		}
+	}
+
+4. 삭제
+
+-  src\main\webapp\WEB-INF\views\member -> view.jsp(기존) 
+
+...
+ <script>
+ 	$(function(){
+ 		$("#btnUpdate").click(function(){
+ 			document.form1.action="${path}/member/update.do";
+ 			document.form1.submit();
+ 		});
+ 		
+ 		$("#btnDelete").click(function(){
+ 	 		if(confirm("삭제 하시겠습니까?")) {
+ 	 			document.form1.action= "${path}/member/delete.do";
+ 	 			document.form1.submit();
+ 	 		}
+ 	 	});
+ 	}); 
+ </script>
+...
+
+
+- src\main\java\com\example\spring01\controller -> MemberController (기존)
+....
+@RequestMapping("member/delete.do")
+	public String delete(String userid, String passwd, Model model) {
+		boolean result = memberService.checkPw(userid, passwd);
+		
+		if (result) {
+			memberService.deleteMember(userid);
+			return "redirect:/member/list.do";
+		} else {
+			model.addAttribute("message", "비밀번호를 확인 하세요.");
+			model.addAttribute("dto", memberService.viewMember(userid));
+			return "member/view";
+		}
+	}
+
+-serviceimpl
+
+
+- daoimple
+	@Override
+	public void deleteMember(String userid) {
+		sqlSession.delete("member.deleteMember", userid);
+
+	}
+
+5. mybatis mapper interface (crud를 더 쉽게 한다)
+기존 memberDao(인터페이스) + memberDAOImpl + memberMapper 3티어 방식으로 했다(이게 보편적이다.)
+하지만, memberDao 하나에 sql을 포함시켜 한번에 세션을 처리 할 수 있다.
+
+- spring02 프로젝트 생성~!
+	프로젝트 : spring02
+	패키지 이름: com.example.spring02
+	-- Sample 프로젝트 pom.xml에서 properteis 부터 끝줄까지 복사 
+	   spring02 프로젝트 pom.xml에서 properties부터 끝줄까지 붙여넣기
+	-- Sample 프로젝트 src/main/resource에 있는 모든 파일을 spring02 src/main/resource 패키지에 붙여넣기
+	   mappers 패키지의 memoMapper.xml 삭제.
+	-- Sample 프로젝트 WEB-INF에 있는 파일(servlet, root-context, web.xml) 해당 자리에 복붙.
+	   servlet.xml 하단 <context:component-scan base-package="com.example.spring02" /> <<수정
+	   root-context.xml 에 아래내용 수정(driverClassName) 
+			   <property name="url"
+				value="jdbc:log4jdbc:oracle:thin:@localhost:1521:orcl" />
+		      	    <property name="username" value="spring" />
+	   		    <property name="password" value="1234" />
+	-- spring02 프로젝트 Alt + enter 후 build path, project facets,code complier 세팅 확인
+
+- war 배포 설명
+	: spring01(혹은 crud[연습])을 선택 후 Export -> web -> war file -> Destination : war 저장 위치 선택 ->
+	하단에 Export source files 채크 해제. -> fin!
+
+	cmd -> apach 9/bin 디렉토리로 이동 <- 동시에 -> apach 9폴더안에 webapps 폴더안에 war파일 복사->
+	(cmd;apach 9/bin) C:\Program Files\ApacheSoftwareFoundation\apache-tomcat-9.0.14\bin>startup <<명령어
+	... 마지막에 start Server starup in ~ miliseconds 확인~
+	
+	(web에서 실행)
+
+-- 메모장 테이블 생성 및 테스트 컬럼 생성
+	create table memo ( idx number not null primary key,
+			    writer varchar2(50) not null,
+			    memo varchar2(200) not null,		
+			    post_date date default sysdate
+				);
+
+	insert into memo(idx, writer, memo) values (1,'im','first memo');
+	insert into memo(idx, writer, memo) values (2, 'kim', 'second memo');
+
+	select * from memo;
+
+	commit;
+	
+	

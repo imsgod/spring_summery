@@ -1,0 +1,54 @@
+package com.example.spring01.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.example.spring01.model.dto.MemberDTO;
+import com.example.spring01.service.MemberService;
+
+@Controller
+@RequestMapping("member/*")
+public class MemberController {
+	
+	private static final Logger LOGGERS = LoggerFactory.getLogger(MemberController.class);
+	
+	@Inject
+	MemberService memberService;
+	
+	@RequestMapping("list.do")
+	public String memberList(Model model) {
+		List<MemberDTO> list = memberService.listMember();
+		model.addAttribute("list", list);
+		return "member/member_list";
+	}
+	
+	@RequestMapping("write.do")
+	public String write() {
+		return "member/write";
+	}
+	
+	@RequestMapping("insert.do")
+	public String insert(@ModelAttribute MemberDTO dto) {
+		LOGGERS.info("MemberDTO 객체 확인 \n 아이디 :" + dto.getUserid() + 
+										"\n 이름 :" + dto.getName() +
+										"\n 비밀번호 :" + dto.getPasswd());		
+	
+		memberService.insertMember(dto);
+		return "redirect:/member/list.do";
+	}
+	
+	@RequestMapping("view.do")
+	public String view(@RequestParam String userid, Model model) {
+		model.addAttribute("dto", memberService.viewMember(userid));
+		return "member/view";
+	}
+}

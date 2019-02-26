@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+	<script>
+		function greeting(name, position) {
+			alert(name + " " + position + "님 오셨습니까!")
+		}
+		
+		function greeting2() {
+			var name = document.getElementById("name").value;
+			var position = document.getElementById("position").value;
+			
+			
+			if (name == "") {
+				alert("이름을 확인해 주세요.");
+				document.getElementById("name").focus();
+				return;
+			}
+			
+			if (position == "") {
+				alert("직급을 확인해 주세요.");
+				document.getElementById("position").focus();
+				return;
+			}
+			 
+			
+			var str = name + " " + position + "님 오셨습니까!";
+			alert(str);
+			document.getElementById("form1").submit();
+		}
+		
+	</script>
+</head>
+<body>
+	<form id="form1" method="post" action="func_result.jsp" >
+		이름 : <input id="name" name="name"> <br>
+		직급 : <input id="position" name="position"> <br>
+		<!-- <button type="button" onclick="greeting('임경수', '회장')"> 확인
+		</button> -->
+		<button type="button" onclick="greeting2()"> confirm
+		</button>
+	</form>
+</body>
+</html>

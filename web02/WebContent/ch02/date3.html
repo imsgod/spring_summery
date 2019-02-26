@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+	<script>
+		
+	</script>
+</head>
+<body>
+	<div id="remaining"></div>
+	<script type="text/javascript">
+		function datesUntilNewYear() {
+		var now = new Date();
+		var newYear = new Date((now.getFullYear() + 1), 0,1);
+		
+		var diff = newYear - now;
+		diff = diff/1000;
+		var seconds = Math.floor(diff % 60);
+		diff = diff/60;
+		var minutes = Math.floor(diff % 60);
+		diff = diff/60;
+		var hours = Math.floor(diff % 24);
+		diff = diff/ 24;
+		var days = Math.floor(diff);
+		
+		var outStr = "내년 신정까지 " + days + "일, " + hours + "시간" + minutes +"분" + seconds + "초 남았습니다."
+		
+		document.getElementById("remaining").innerHTML = outStr;
+		setTimeout("datesUntilNewYear()", 1000);
+		
+		}
+		datesUntilNewYear();
+	</script>
+</body>
+</html>

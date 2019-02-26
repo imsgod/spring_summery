@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+	<script>
+		function chkDate() {
+			var s = document.getElementById("pdate").value;
+			document.write( s + "<br>");
+			
+			var pdate = new Date(s); //특정날짜
+			var today = new Date();  // 오늘
+			
+			document.write("PersonBuyTimeStamp : " + pdate.getTime() + "<br>"); // 지정한 날짜 밀리세컨드
+			document.write("TodaysTimeStamp : " + today.getTime() + "<br>"); // 오늘 날짜 밀리세컨드
+			
+			var diff = today.getTime() - pdate.getTime(); // 지정 날짜 - 오늘 날짜 
+			document.write("지정 날짜 - 오늘 날짜 : " + diff + "<br>");
+			document.write(diff / (1000 * 60 * 60 *24));
+			
+			var days = Math.floor(diff / (100 * 60 * 60 * 24) );
+			document.write("day : " + days);
+			
+			if(days > 30) {
+				alert("30일 이내에만 교환 가능합니다.")
+			} else {
+				alert("교환 가능 합니다.")
+			}
+		}
+	</script>
+</head>
+<body>
+	구입 날짜 : <input type="date" id="pdate">
+	<button onclick="chkDate()"> Inspection </button>
+</body>
+</html>

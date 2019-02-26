@@ -1,0 +1,69 @@
+package com.example.spring02.service.pdf;
+
+import java.io.FileOutputStream;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.example.spring02.service.shop.CartService;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
+@Service
+public class PdfServiceImpl implements PdfService{
+	
+	@Inject
+	CartService cartService;
+	
+	@Override
+	public String create() {
+		String result = "";
+		try {
+			// pdf 문서 객체
+			Document document = new Document();
+			// pdf 생성 객체
+			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("d:/work/sample.pdf"));
+			
+			document.open();
+			
+			BaseFont baseFont = BaseFont.createFont("C:/Windows/Fonts/D2Coding.ttc", 
+											BaseFont.IDENTITY_H, BaseFont.EMBEDDED); 
+			Font font = new Font(baseFont, 12);
+			PdfPTable table = new PdfPTable(4);
+			Chunk chunk = new Chunk("장바구니", font);
+			Paragraph phragraph = new Paragraph(chunk);
+			phragraph.setAlignment(Element.ALIGN_CENTER);
+			document.add(phragraph);
+			document.add(Chunk.NEWLINE);
+			document.add(Chunk.NEWLINE);
+			PdfPCell cell1 = new PdfPCell(new Phrase("상품명",font));
+			PdfPCell cell2 = new PdfPCell(new Phrase("단가", font));
+			PdfPCell cell3 = new PdfPCell(new Phrase("수량",font));
+			PdfPCell cell4 = new PdfPCell(new Phrase("금액", font));
+			table.addCell(cell1);
+			table.addCell(cell2);
+			table.addCell(cell3);
+			table.addCell(cell4);
+			
+			document.add(table);
+			document.close();
+			
+			
+			result = "pdf 파일이 생성 되었습니다.";
+		} catch (Exception e) {
+			result = "pdf 파일 생성 실패...";
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+}

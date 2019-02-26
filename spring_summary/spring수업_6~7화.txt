@@ -1,0 +1,1294 @@
+6화
+--------------------------------------------------------------------------------
+1. mybatis에서 sql query를 작성하는 방법; memoController
+	- (기존) mapper.xml 파일에서 작성
+	  MemoDAO(인터페이스) // MemoDAOImpl (구현) // memoMapper.xml(매퍼)
+	
+	- (새로운) mapper 인터페이스에서 작성
+	  MemoDAO 에 쿼리 포함.
+
+- root-context.xml에 코드 추가 </beans> 태그 끝나기전 바로위에 추가했음.
+  <mybatis-spring:scan base-package="com.example.spring02.model.memo"/>
+
+- 패키지 생성 com.example.spring02 (기본/하위/생성 ) 
+				└ controller
+					└ memo (com.example.spring02.controller.memo)
+					└ product (추후)
+					└ board (추후)
+				└ model
+					└ memo
+						└ dao (com.example.spring02.model.memo.dao)
+						└ dto (com.example.spring02.model.memo.dto)
+				└ service
+					└ memo (com.example.spring02.service.memo)
+
+- com.example.spring02.model.memo.dto ->  MemoDTO (생성)
+
+package com.example.spring02.model.memo.dto;
+
+import java.util.Date;
+
+public class MemoDTO {
+	private int idx;
+	private String writer, memo;
+	private Date post_date;
+	
+	public MemoDTO() {}
+	
+	public MemoDTO(String writer, String memo) {
+		super();
+		this.writer = writer;
+		this.memo = memo;
+	}
+
+	public int getIdx() {
+		return idx;
+	}
+
+	public void setIdx(int idx) {
+		this.idx = idx;
+	}
+
+	public String getWriter() {
+		return writer;
+	}
+
+	public void setWriter(String writer) {
+		this.writer = writer;
+	}
+
+	public String getMemo() {
+		return memo;
+	}
+
+	public void setMemo(String memo) {
+		this.memo = memo;
+	}
+
+	public Date getPost_date() {
+		return post_date;
+	}
+
+	public void setPost_date(Date post_date) {
+		this.post_date = post_date;
+	}
+
+	@Override
+	public String toString() {
+		return "MemoDTO [idx=" + idx + ", writer=" + writer + ", memo=" + 
+			memo + ", post_date=" + post_date + "]";
+	}
+}
+
+
+- com.example.spring02.model.memo.dao -> MemoDAO(인터페이스 생성)
+
+기존과 다르게 MemoController - > MemoService -> MemoServiceImpl -> MemoDAO (<< fin)
+(기존 MemoController - > MemoService -> MemoServiceImpl -> MemoDAO -> MemoDAOImpl -> memoMapper)
+
+package com.example.spring02.model.memo.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Select;
+
+import com.example.spring02.model.memo.dto.MemoDTO;
+
+public interface MemoDAO {
+	
+	@Select("select * from memo order by idx desc")
+	public List<MemoDTO> list();
+}
+
+
+- com.example.spring02.service.memo -> MemoService (인터페이스 생성)
+
+package com.example.spring02.service.memo;
+
+import java.util.List;
+
+import com.example.spring02.model.memo.dto.MemoDTO;
+
+public interface MemoService {
+	public List<MemoDTO> list();
+	public void insert(MemoDTO dto);
+	public MemoDTO memo_view(int idx);
+	public void delete(int idx);
+	public void update(MemoDTO dto);
+	
+}
+
+- com.example.spring02.service.memo -> MemoServiceImpl (생성)
+생성시 중간단 add 클릭 후 MemoService (인터페이스) 추가 후 fin~
+
+package com.example.spring02.service.memo;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.example.spring02.model.memo.dto.MemoDTO;
+
+@Service << 추가
+public class MemoServiceImpl implements MemoService {
+	
+	@Inject << 추가
+	MemoDAO memoDao; << 추가	 
+
+	@Override
+	public List<MemoDTO> list() {
+		return memoDao.list(); << 코드 추가
+	}
+
+	@Override
+	public void insert(MemoDTO dto) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public MemoDTO memo_view(int idx) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void delete(int idx) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void update(MemoDTO dto) {
+		// TODO Auto-generated method stub
+
+	}
+
+}
+
+- com.example.spring02.controller.memo - > MemoController (생성)
+
+package com.example.spring02.controller.memo;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.example.spring02.model.memo.dto.MemoDTO;
+import com.example.spring02.service.memo.MemoService;
+
+@Controller << 추가
+@RequestMapping("memo/*") //공통적인 url patter << 추가
+public class MemoController {
+	
+	@Inject << 추가
+	MemoService memoService; << 추가
+	
+	@RequestMapping("list.do") << 추가
+	public ModelAndView list(ModelAndView mav) {
+		List<MemoDTO> items = memoService.list();
+		mav.setViewName("memo/memo_list");
+		mav.addObject("list", items);
+		return mav;
+		
+	}
+	
+/*	@RequestMapping("list.do")
+	public ModelAndView list() { //Map test @ModelAttribute MemoDTO model
+		//Map<String, Object> items = new HashMap<>();
+		//items.put("list", new MemoDTO(model.getWriter(), model.getMemo()));
+		List<MemoDTO> items = memoService.list();
+		return new ModelAndView("memo/memo_list", "list", items);
+	}*/
+	
+ 
+		
+}
+
+- src\main\webapp\WEB-INF\views -> include (폴더생성)
+
+- servlet-context.xml 
+<resources mapping="/include/**" location="/WEB-INF/views/include/" /> << 추가
+<resources mapping="/images/**"	location="/WEB-INF/views/images/" /> << 추가
+
+- src\main\webapp\WEB-INF\views\include -> style.css (css파일생성)
+
+@charset "UTF-8";
+/*views/include/style.css*/
+a:link {text-decoration: none; colr: blue; }
+a:hover {text-decoration: underline; color: red;}
+a:visited { text-decoration: none;}
+a:active{text-decoration: none; color: yellow;}
+
+- src\main\webapp\WEB-INF\views -> jquery-3.2.1.min.js 
+(js파일 붙여넣기)
+
+- src\main\webapp\WEB-INF\views -> header.jsp (jsp파일생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<c:set var="path" value="${pageContext.request.contextPath}"></c:set>
+<script src="${path}/include/jquery-3.2.1.min.js"></script>
+<link rel="stylesheet" href="${path}/include/style.css"> <<기존에서 style.css 링크시켜줌
+
+- src\main\webapp\WEB-INF\views -> memu.jsp (jsp파일생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+ 
+<c:set var="path" value="${pageContext.request.contextPath}"/>
+<script src="${path}/include/jquery-3.2.1.min.js"></script>
+
+ <a href="${path}"> home </a>
+ <a href="${path}/memo/list.do"> MEMO </a>
+ <hr>
+
+- src\main\webapp\WEB-INF\views -> memo (폴더생성)
+
+- src\main\webapp\WEB-INF\views\memo -> memo_list(jsp 생성)
+이부분은 탬플릿으로 설정. windows - preference - web - jsp files -
+			  editor - templates - New JSP file(html) - edit
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %> << 설정 
+
+ <%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+<h2>메모장</h2>
+	<table>
+		<tr>
+			<td>번호</td>
+			<td>이름</td>
+			<td>메모</td>
+			<td>날짜</td>
+		</tr>
+		<c:forEach var="row" items="${list}">
+			<tr>
+				<td>${row.idx}</td>
+				<td>${row.writer}</td>
+				<td>${row.memo}</td>
+				<td>${row.post_date}</td>
+			</tr>
+		</c:forEach>
+	</table>	
+</body>
+</html>
+ 
+- 주소 : http://localhost:8080/spring02/memo/list.do
+
+<annotation-driven /> << 이것이 있어야 @Controller, @Repository, @Service..
+등의 애노테이션을 붙여 스프링이 객체를 생성해서 각기 링크(인식)시켜준다.
+
+2. 글 쓰기(insert.do)
+- src\main\webapp\WEB-INF\views\memo -> memo_list(기존)
+
+...
+<h2>메모장> << 추가
+<form method="post" action="${path}/memo/insert.do">
+이름 : <input name="writer" size = "10"> <br> 
+메모 : <input name="memo" size="40">
+<input type="submit" value="확인">
+</form>
+	<table>
+
+....
+
+- com.example.spring02.controller.memo - > MemoController (기존)
+
+...
+@RequestMapping("insert.do")
+	public String inssert(@ModelAttribute MemoDTO dto) {
+		memoService.insert(dto);
+		return "redirect:/memo/list.do";
+	}
+
+
+- com.example.spring02.service.memo -> MemoServiceImpl (기존)
+
+...
+	@Override
+	public void insert(MemoDTO dto) {
+		memoDao.insert(dto.getWriter(), dto.getMemo());
+
+	}
+
+
+- com.example.spring02.model.memo.dao -> MemoDAO(기존)
+
+...
+@Insert("insert into memo(idx, writer, memo) values ( (select nvl(max(idx)+1, 1) from memo), #{writer}, #{memo})")
+	public void insert(@Param("writer") String writer, @Param("memo") String memo);
+
+
+
+3. 상세 (view detail)
+
+- src\main\webapp\WEB-INF\views\memo -> memo_list(기존)
+
+...
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+<script> << 추가
+	function memo_view(idx) {
+		location.href="${path}/memo/view/" + idx;
+	}
+</script>
+
+...
+ 
+<c:forEach var="row" items="${list}">
+			<tr>
+				<td>${row.idx}</td>
+				<td>${row.writer}</td>
+				<td> <a href="#" onclick="memo_view('${row.idx}')"> <<추가
+					${row.memo}</a>
+				</td>
+				<td> <fmt:formatDate value="${row.post_date}" pattern="yyyy-MM-dd HH:mm:ss"/>
+				</td>
+
+			</tr>
+		</c:forEach>  
+...
+
+- com.example.spring02.controller.memo - > MemoController (기존)
+
+...
+@RequestMapping("view/{idx}") 
+	public ModelAndView view(@PathVariable int idx, ModelAndView mav) {
+		mav.setViewName("memo/view");
+		mav.addObject("dto", memoService.memo_view(idx));
+		return mav;
+	}
+
+- com.example.spring02.service.memo -> MemoServiceImpl (기존)
+
+...
+	@Override
+	public MemoDTO memo_view(int idx) {
+		return memoDao.memo_view(idx);
+	}
+
+- com.example.spring02.model.memo.dao -> MemoDAO(기존)
+
+...
+@Select("select * from memo where idx = #{idx}")
+	public MemoDTO memo_view(@Param("idx") int idx);
+
+
+- src\main\webapp\WEB-INF\views\memo -> view(jsp 생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+<h2>메모 보기</h2>
+
+	<form name="form1" method="post">
+		<table border="1" width="500px">
+			<tr>
+				<td>번호</td>
+				<td>${dto.idx}</td>
+			</tr>
+			<tr>
+				<td>이름</td>
+				<td> <input name="writer" value="${dto.writer}"></td>
+			</tr>
+			<tr>
+				<td>메모</td>
+				<td><input name="memo" value="${dto.memo}" size="50"> </td>
+			</tr>
+			<tr align="center">
+				<td colspan="2">
+					<input type="hidden" name="idx" value="${dto.idx}">
+					<input type="button" value="수정" id="btnUpdate">
+					<input type="button" value="삭제" id="btnDelete">
+				</td>
+			</tr>
+		</table>	
+	</form>
+</body>
+</html>
+
+4. 수정
+
+- src\main\webapp\WEB-INF\views\memo -> view(기존)
+
+...
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+<script> << 추가
+	$(function() {
+		$("#btnUpdate").click(function(){
+			document.form1.action="${path}/memo/update/${dto.idx}";
+			document.form1.submit();
+		});
+	});
+</script>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+...
+
+- com.example.spring02.controller.memo - > MemoController (기존)
+
+...
+@RequestMapping("update/{idx}")
+	public String update(@PathVariable int idx, @ModelAttribute MemoDTO dto) {
+		memoService.update(dto);
+		return "redirect:/memo/list.do";
+	}
+
+- com.example.spring02.model.memo.dao -> MemoDAO(기존)
+
+	...
+	@Update("update memo set writer=#{writer}, memo=#{memo} where idx=#{idx}") 
+	public void update(MemoDTO dto);
+
+
+- com.example.spring02.service.memo -> MemoServiceImpl (기존)
+
+	...
+	@Override
+	public void update(MemoDTO dto) {
+		memoDao.update(dto);
+	}
+
+5. 삭제
+
+- src\main\webapp\WEB-INF\views\memo -> view(기존)
+
+...
+<%@ include file="../include/header.jsp" %>
+
+<script>
+	$(function() {
+		$("#btnUpdate").click(function(){
+			document.form1.action="${path}/memo/update/${dto.idx}";
+			document.form1.submit();
+		});
+		
+		 $("#btnDelete").click(function(){ << 추가
+			if (confirm("삭제 할까요?")) {
+			document.form1.action="${path}/memo/delete/${dto.idx}";
+			document.form1.submit();
+			}
+		});  
+		
+	});
+</script>
+
+</head>
+<body>
+...
+
+- com.example.spring02.controller.memo - > MemoController (기존)
+
+...
+@RequestMapping("delete/{idx}")
+	public String delete(@PathVariable int idx) {
+		memoService.delete(idx);
+		return "redirect:/memo/list.do";
+	}
+
+
+- com.example.spring02.model.memo.dao -> MemoDAO(기존)
+
+...
+@Delete("delete from memo where idx=#{idx}")
+	public void delete(@Param("idx") int idx);
+
+- com.example.spring02.service.memo -> MemoServiceImpl (기존)
+
+	...
+	@Override
+	public void delete(int idx) {
+		memoDao.delete(idx);
+	}
+
+6. 파일 업로드
+일반적인 방식 / 비동기적인 방식(ajax)
+
+- 테이블 생성
+
+ create table product(
+ product_id number, 
+ product_name varchar2(50), 
+ price number default 0, 
+ description clob,
+ picture_url varchar2(500),
+ primary key(product_id)
+ );
+
+insert into product values (1,'레몬',1500,'레몬에 포함된 구연산은 피로회복에 좋습니다. 비타민 C도 풍부합니다.','lemon.jpg');
+insert into product values (2,'오렌지',2000,'비타민 C가 풍부합니다. 생과일 주스로 마시면 좋습니다.','orange.jpg');
+insert into product values (3,'키위',3000,'비타민 C가 풍부합니다. 다이어트나 미용에 좋습니다.','kiwi.jpg');
+insert into product values (23,'키위',3000,'비타민 C가 풍부합니다. 다이어트나 미용에 좋습니다.','kiwi.jpg');
+
+insert into product values (4,'포도',5000,'폴리페놀을 다량 함유하고 있어 항산화 작용을 합니다.','grape.jpg');
+insert into product values (5,'딸기',8000,'비타민 C나 플라보노이드를 다량 함유하고 있습니다.','strawberry.jpg');
+insert into product values (6,'귤',7000,'시네피린을 함유하고 있어 감기 예방에 좋다고 합니다..','gengerine.jpg');
+
+SELECT count(*) from product;
+
+select * from product; 
+ 
+commit; 
+
+- src\main\webapp\WEB-INF\views -> images(폴더 생성)
+	수업 소스- 상품이미지 붙여넣기 & servlet-context.xml에 리소스 태그 확인~!
+
+- 상품코드를 위한 시퀀스 생성 및 테스트 레코드 하나 생성
+
+create sequence seq_product
+start with 10
+increment by 1;
+
+insert into product values(seq_product.nextval, '사과', 1500, '맛있는 사과 입니다.', 'apple.jpg');
+
+commit; 
+
+- 파일 업로드 프로그래밍을 할려면 pom.xml에 라이브러리 추가 해야한다.
+
+https://mvnrepository.com/
+
+...
+<dependencies>
+
+<!--  파일업로드 관련 라이브러리  -->
+<dependency>
+<groupId>commons-fileupload</groupId>
+<artifactId>commons-fileupload</artifactId>
+<version>1.3.3</version>
+</dependency>
+ <!--  이미지 썸네일을 만들어주는 라이브러리  -->
+<dependency>
+<groupId>org.imgscalr</groupId>
+<artifactId>imgscalr-lib</artifactId>
+<version>4.2</version>
+</dependency>
+...
+
+--------------------------------------------------------------------------------
+
+7화
+--------------------------------------------------------------------------------
+1. 파일 업로드 (6화-6 이어서)
+- servlet-context.xml (파일 업로드 관련 설정)
+
+	...
+	<!-- 파일 업로드 관련 설정 --> <<추가
+	<beans:bean id="multipartResolver"
+				class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+			<beans:property name="maxUploadSize" value="10485760"></beans:property>
+	</beans:bean>
+	
+ 	<!--  파일 업로드를 위한 디렉토리 설정--> <<추가
+	<beans:bean id="uploadPath"
+				class="java.lang.String">
+				<beans:constructor-arg value="d:/upload"/>
+	</beans:bean>
+</beans:beans> <<끝
+
+- src\main\webapp\WEB-INF\views\include -> menu(기존)
+
+...
+ <a href="${path}"> home </a>
+ <a href="${path}/memo/list.do"> MEMO </a>
+ <a href="${path}/upload/uploadForm">업로드 테스트</a> << 추가
+
+- 업로드 처리 프로세서
+/upload/uploadForm => 콘트롤러 -> 업로드 페이지 -> 파일 업로드 -> 컨트롤러 -> 파일 업로드 처리
+
+- com.example.spring02.controller-> upload(패키지 생성)  
+
+- com.example.spring02.controller.upload -> UploadController(생성)
+package com.example.spring02.controller.upload;
+
+import javax.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+
+@Controller
+public class UploadController {
+	
+	private static final Logger LOGGERS = LoggerFactory.getLogger(UploadController.class);
+	
+	@Resource(name="uploadPath")
+	String uploadPath;
+	
+	// 업로드 폼 페이지 이동
+	@RequestMapping(value="/upload/uploadForm", method = RequestMethod.GET)
+	public String uploadForm() {
+		// views/upload/uploadForm.jsp로 포워딩
+		return "upload/uploadForm";
+	}
+	
+	// 업로드 된 파일을 처리, 주소는 같지만 [uploadForm()] 용도는 다르다.
+	@RequestMapping(value="upload/uploadForm", method = RequestMethod.POST)
+	public ModelAndView uploadForm(MultipartFile file, ModelAndView mav) throws Exception {
+		String savedName = file.getOriginalFilename();
+		savedName = uploadFile(savedName, file.getBytes());
+		mav.setViewName("upload/uploadResult");
+		mav.addObject("savedName", savedName);
+		return mav;
+	}
+
+	private String uploadFile(String originalName, byte[] fileDate) throws Exception  {
+		UUID uid = UUID.randomUUID();
+		String savedName = uid.toString() + " _ " + originalName;
+		// new file(디렉토리, 파일이름)
+		File target = new File(uploadPath, savedName);
+		// 첨부된 파일을 임시디렉토리에서 우리가 지정한 디렉토리로 복사
+		FileCopyUtils.copy(fileDate, target);
+		return savedName;
+	}
+}
+
+- src\main\webapp\WEB-INF\views-> upload (폴더 생성)
+
+- src\main\webapp\WEB-INF\views\upload -> uploadForm(jsp 생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+<style>
+	iframe {
+		width: 800px;
+		height: 200px;
+		border: 1px;
+		border-style: solid;
+	}
+</style>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+<!--   enctype="multipart/form-data"  파일업로드시 반드시 있어야할 코드-->
+<form action="${path}/upload/uploadForm" method="post" enctype="multipart/form-data" target="iframe1">
+	<input type="file" name="file">
+	<input type="submit" value="업로드">
+</form>
+<!--  결과 출력 코드-->
+<iframe name="iframe1"></iframe>
+</body>
+</html>
+
+- src\main\webapp\WEB-INF\views\upload ->uploadResult(jsp 생성)
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+파일이 업로드 되었습니다<br>
+파일명 : ${savedName}
+</body>
+</html>
+
+2. 상품관리 설명
+- 일반사용자 : 상품목록 보기, 장바구니 담기, 장바구니보기
+- 관리자 : 상품등록, 상품수정, 삭제.
+
+3. 상품관리 list 보기
+- com.example.spring02.model.shop.ProductDTO (생성)
+
+package com.example.spring02.model.shop.dto;
+
+import org.springframework.web.multipart.MultipartFile;
+
+/**
+ * @author ImKyoungsu
+ *
+ */
+public class ProductDTO {
+	private int product_id;
+	private String product_name;
+	private int pirce;
+	private String descriptioin;
+	private String pricture_url;
+	private MultipartFile file1; //첨부파일
+	
+	public int getProduct_id() {
+		return product_id;
+	}
+	public void setProduct_id(int product_id) {
+		this.product_id = product_id;
+	}
+	public String getProduct_name() {
+		return product_name;
+	}
+	public void setProduct_name(String product_name) {
+		this.product_name = product_name;
+	}
+	public int getPirce() {
+		return pirce;
+	}
+	public void setPirce(int pirce) {
+		this.pirce = pirce;
+	}
+	public String getDescriptioin() {
+		return descriptioin;
+	}
+	public void setDescriptioin(String descriptioin) {
+		this.descriptioin = descriptioin;
+	}
+	public String getPricture_url() {
+		return pricture_url;
+	}
+	public void setPricture_url(String pricture_url) {
+		this.pricture_url = pricture_url;
+	}
+	public MultipartFile getFile1() {
+		return file1;
+	}
+	public void setFile1(MultipartFile file1) {
+		this.file1 = file1;
+	}
+	
+	@Override
+	public String toString() {
+		return "ProductDTO [product_id=" + product_id + ", product_name=" + product_name + ", pirce=" + pirce
+				+ ", descriptioin=" + descriptioin + ", pricture_url=" + pricture_url + ", file1=" + file1 + "]";
+	}
+	
+	
+}
+
+- com.example.spring02.model.shop.dao.ProductDAO(interface 생성)
+
+package com.example.spring02.model.shop.dao;
+
+import java.util.List;
+
+import com.example.spring02.model.shop.dto.ProductDTO;
+
+public interface ProductDAO {
+	public List<ProductDTO> listProduct();
+	public void insertProduct(ProductDTO dto);
+	public ProductDTO detailProduct(int product_id);
+	public void deleteProduct(int product_id);
+	public void updateProduct(ProductDTO dto);
+	public String fileInfo(int product_id);
+}
+
+
+- com.example.spring02.model.shop.dao.ProductDAOImpl(생성)
+
+package com.example.spring02.model.shop.dao;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Repository;
+
+import com.example.spring02.model.shop.dto.ProductDTO;
+
+@Repository <<
+public class ProductDAOImpl implements ProductDAO {
+	
+	@Inject <<
+	SqlSession sqlSession;
+	
+	@Override
+	public List<ProductDTO> listProduct() {
+		return sqlSession.selectList("product.product_list"); << List
+	}
+
+	@Override
+	public void insertProduct(ProductDTO dto) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public ProductDTO detailProduct(int product_id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteProduct(int product_id) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateProduct(ProductDTO dto) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public String fileInfo(int product_id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}
+
+- src\main\resources\mappers -> shop(폴더생성)
+- src\main\resources\mappers\shop -> productMapper (xml 생성)
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper << 요거 있는 xml
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  << 요거 있는 xml
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> << 요거 있는 xml
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="product">
+	<select id="product_list"
+			resultType="com.example.spring02.model.shop.dto.ProductDTO">
+
+			select *
+			  from product
+			  order by product_name
+
+	</select>
+	
+</mapper>
+
+tip) resultType="com.example.spring02.model.shop.dto.ProductDTO">이 길다.
+그래서  src\main\resources\mybatis-config.xml 을 이용해서
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration << 요거 있는 xml
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN" << 요거 있는 xml
+  "http://mybatis.org/dtd/mybatis-3-config.dtd"> << 요거 있는 xml
+<configuration>
+
+	<typeAliases>
+		<typeAlias type="com.example.spring02.model.shop.dto.ProductDTO"
+		alias="productDTO"/>
+	</typeAliases>
+
+</configuration>
+
+등록 후에 다시 productMapper 로 와서
+..
+<select id = "product_list"
+resultType="productDTO"> <<로 해준다.
+..
+
+- com/example/spring02/service -> shop(패키지 생성)
+- com/example/spring02/service/shop - > ProductService (interface 생성)
+
+package com.example.spring02.service.shop;
+
+import java.util.List;
+
+import com.example.spring02.model.shop.dto.ProductDTO;
+
+public interface ProductService {
+	public List<ProductDTO> listProduct();
+	public void insertProduct(ProductDTO dto);
+	public ProductDTO deatilProduct(int product_id);
+	public void deleteProduct(int product_id);
+	public void updateProduct(ProductDTO dto);
+	public String fileInfo(int product_id);
+}
+
+- com/example/spring02/service/shop -> ProductServiceImpl(생성)
+
+package com.example.spring02.service.shop;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.example.spring02.model.shop.dao.ProductDAO;
+import com.example.spring02.model.shop.dto.ProductDTO;
+
+@Service
+public class ProductServiceImpl implements ProductService {
+	
+	@Inject
+	ProductDAO productDao;
+	
+	@Override
+	public List<ProductDTO> listProduct() {
+		return productDao.listProduct();
+	}
+
+	@Override
+	public void insertProduct(ProductDTO dto) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public ProductDTO deatilProduct(int product_id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteProduct(int product_id) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateProduct(int product_id) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public String fileInfo(int product_id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}
+
+- src\main\webapp\WEB-INF\views\include -> menu(기존)
+
+...
+ <a href="${path}"> home </a>
+ <a href="${path}/memo/list.do"> MEMO </a>
+ <a href="${path}/upload/uploadForm">업로드 테스트</a>
+ <a href="${path}/shop/product/list.do">상품 목록</a> << 생성
+
+
+- com.example.spring02.controller -> shop(패키지 생성)
+- com.example.spring02.controller.shop -> ProductController (생성) 
+
+package com.example.spring02.controller.shop;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.example.spring02.service.shop.ProductService;
+
+@Controller
+@RequestMapping("shop/product/*")
+public class ProductController {
+	
+	@Inject
+	ProductService productService;
+
+	@RequestMapping("list.do")
+	public ModelAndView list(ModelAndView mav) {
+		mav.setViewName("/shop/product_list");
+		mav.addObject("list", productService.listProduct());
+		return mav;
+	}
+	
+}
+
+
+
+- src\main\webapp\WEB-INF\views -> shop(폴더생성)
+- src\main\webapp\WEB-INF\views\shop -> product_list(jsp생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+ <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+ <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+	<h2>상품 목록</h2>
+	<table border="1" width="500px">
+		<tr>	
+			<td>상품 코드</td>
+			<td>bsp;</td>
+			<td>상품명</td>
+			<td>가격</td>
+		</tr>
+		<c:forEach var="row" items="${list}">
+			<tr>
+				<td>${row.product_id}</td>
+				<td><img src="${path}/images/${row.picture_url}" width="100px" height="100px">
+				<td>${row.product_name}</td>
+				<td> <fmt:formatNumber value="${row.price}" pattern="#,###"/>
+				</td>
+			</tr>
+		</c:forEach>
+	</table> 
+</body>
+</html>
+
+4. 상품관리 상세(detail)
+- src\main\webapp\WEB-INF\views\shop -> product_list(기존)
+
+...
+	<c:forEach var="row" items="${list}">
+		<tr>
+		<td>${row.product_id}</td>
+			<td> <img src="${path}/images/${row.picture_url}" width="100px" height="100px"> 
+			</td>
+			<td> <a href="${path}/shop/product/detail/${row.product_id}"></a> << 추가
+			${row.product_name}</td>
+			<td> <fmt:formatNumber value="${row.price}" pattern="#,###"/>
+			</td>
+		</tr>
+	</c:forEach>
+
+
+- com.example.spring02.controller.shop -> ProductController(기존)
+
+	...
+	@RequestMapping("detail/{product_id}")
+	public ModelAndView detail(@PathVariable int product_id, ModelAndView mav) {
+		mav.setViewName("/shop/product_detail");
+		mav.addObject("dto", productService.deatilProduct(product_id));
+		return mav;
+	}
+
+ - src\main\resources\mappers\shop -> productMapper (기존)
+ 
+...
+<select id="detail_product"
+			resultType="com.example.spring02.model.shop.dto.ProductDTO">
+			select *
+			  from product
+			 where product_id=#{product_id}
+	</select>
+
+- com.example.spring02.model.shop.dao.ProductDAOImpl(기존)
+
+	...
+	@Override
+	public ProductDTO detailProduct(int product_id) {
+		return sqlSession.selectOne("product.detail_product",product_id);
+	}
+
+- com/example/spring02/service/shop -> ProductServiceImpl(기존)
+	
+	...
+	@Override
+	public ProductDTO deatilProduct(int product_id) {
+		return productDao.detailProduct(product_id);
+	}
+
+- src\main\webapp\WEB-INF\views\shop -> product_detail(jsp 생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+<h2>상품 정보</h2>
+	<table>
+		<tr>
+			<td> <img src="${path}/images/${dto.picture_url}" width="300px" height="300px">
+			</td>
+			
+			<td align="center">
+				<table>
+					<tr>
+						<td>상품명</td>
+						<td>${dto.product_name}</td>
+					</tr>
+					
+					<tr>
+						<td>가격</td>
+						<td>${dto.price}</td>
+					</tr>
+					
+					<tr>
+						<td>&nbsp;</td>
+						<td>${dto.description}</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
+
+
+5. 상품관리 상세에서 장바구니 담기
+
+- src\main\webapp\WEB-INF\views\shop -> product_detail(기존)
+
+...
+<td align="center">
+				<table>
+					<tr>
+						<td>상품명</td>
+						<td>${dto.product_name}</td>
+					</tr>
+					
+					<tr>
+						<td>가격</td>
+						<td>${dto.price}</td>
+					</tr>
+					
+					<tr>
+						<td>&nbsp;</td>
+						<td>${dto.description}</td>
+					</tr>
+					
+					<tr>
+						<td colspan="2"> << 추가
+							<form action="${path}/shop/cart/insert.do" name="form1" 									method="post">
+								<input type="hidden" name="product_id" 											value="${dto.product_id}">
+								<select name="amount">
+									<c:forEach begin="1" end="10" var="i">
+										<option value="${i}"> ${i}</option>
+									</c:forEach>
+								</select>
+								<input type="submit" value="장바구니 담기">
+							</form>
+						</td>
+					</tr>
+				</table>
+			</td>
+
+- com.example.spring02.controller.shop -> CartConroller(생성)
+
+package com.example.spring02.controller.shop;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("shop/cart/*")
+public class CartConroller {
+	
+	//@Inject
+	
+	@RequestMapping("insert.do")
+	public String insert(HttpSession session) {
+		String userid = (String) session.getAttribute("userid");
+		if (userid == null) {
+			return "redirect:/member/login.do";
+		}
+		return "redirect:/shop/cart/list.do";
+	}
+}
+
+- src\main\webapp\WEB-INF\views\include -> menu(기존)
+
+	...
+	 <a href="${path}"> home </a> |
+ 	<a href="${path}/memo/list.do"> MEMO </a> |
+	<a href="${path}/upload/uploadForm">업로드 테스트</a> |
+	 <a href="${path}/shop/product/list.do">상품 목록</a> |
+ 
+ 	<div style="text-align: right;"> <<추가
+ 		<a href="${path}/member/login.do"> 로그인 </a>
+ 	</div>
+
+- com.example.spring02.controller -> member(패키지 생성)
+- com.example.spring02.controller.member -> MemberConroller(생성)
+
+package com.example.spring02.controller.member;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("member/*")
+public class MemberController {
+	private static final Logger LOGGERS = LoggerFactory.getLogger(MemberController.class);
+	
+	@RequestMapping("login.do")
+	public String login() {
+		return "member/login";
+	}
+}
+
+- src\main\webapp\WEB-INF\views - > member(폴더 생성)
+- src\main\webapp\WEB-INF\views\member -> login(생성)
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<%@ include file="../include/header.jsp" %>
+</head>
+<body>
+<%@ include file="../include/menu.jsp" %>
+	<h2>로그인</h2>
+	<form name="form1" method="post">
+		<table border="1" width="400px">
+			<tr>
+				<td>아이디</td>
+				<td><input name="userid" id="userid"></td>
+			</tr>
+			
+			<tr>
+				<td>비밀번호</td>
+				<td> <input type="password" name="passwd" id="passwd"></td>
+			</tr>
+			
+			<tr>
+				<td colspan="2" align="center">
+					<input type="button" id="btnLogin" value="로그인">
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</html>

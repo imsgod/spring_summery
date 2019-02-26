@@ -1,0 +1,13 @@
+package com.example.spring02.model.dao;
+
+import java.util.List;
+
+import com.example.spring02.model.dto.MemoDTO;
+
+public interface MemoDAO {
+	public List<MemoDTO> list();
+	public void insert(MemoDTO dto);
+	public MemoDTO memo_view(int idx);
+	public void delete(int idx);
+	public void update(MemoDTO dto);
+}
