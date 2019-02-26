@@ -1,5 +1,5 @@
-GitRepositoriesView.GitDirectories=C\:\\Users\\ImKyoungsu\\git\\spring11\\.git;C\:\\Users\\ImKyoungsu\\git\\spring11_full\\.git;
-GitRepositoriesView.GitDirectories.relative=C\:\\Users\\ImKyoungsu\\git\\spring11\\.git;C\:\\Users\\ImKyoungsu\\git\\spring11_full\\.git;
+GitRepositoriesView.GitDirectories=C\:\\Users\\ImKyoungsu\\git\\spring11\\.git;D\:\\work\\.git;C\:\\Users\\ImKyoungsu\\git\\spring11_full\\.git;D\:\\work\\spring22_repo\\.git;
+GitRepositoriesView.GitDirectories.relative=C\:\\Users\\ImKyoungsu\\git\\spring11\\.git;.git;C\:\\Users\\ImKyoungsu\\git\\spring11_full\\.git;spring22_repo\\.git;
 RepositorySearchDialogSearchPath=C\:\\Users\\ImKyoungsu\\git
 core_autoIgnoreDerivedResources=false
 eclipse.preferences.version=1
