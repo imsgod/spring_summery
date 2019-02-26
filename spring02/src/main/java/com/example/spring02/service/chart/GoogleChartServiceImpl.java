@@ -15,7 +15,6 @@ import com.example.spring02.service.shop.CartService;
 
 @Service
 public class GoogleChartServiceImpl implements GoogleChartService {
-	
 	@Inject
 	CartService cartService;      
 	
@@ -54,7 +53,7 @@ public class GoogleChartServiceImpl implements GoogleChartService {
 			body.add(cel1);
 		}
 		
-		data.put("cols", title);
+		data.put("rows", body);
 		
 		return data;
 	}
