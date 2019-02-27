@@ -56,8 +56,6 @@ public class CartDAOImpl implements CartDAO {
 
 	}
 
-	
-
 	@Override
 	public int countCart(String userid, int product_id) {
 		// TODO Auto-generated method stub
