@@ -6,16 +6,16 @@ public class UserDTO {
 	private String name;
 	private int upoint;
 	
-	protected String getUserid() {
+	public String getUserid() {
 		return userid;
 	}
-	protected String getUpw() {
+	public String getUpw() {
 		return upw;
 	}
-	protected String getName() {
+	public String getName() {
 		return name;
 	}
-	protected int getUpoint() {
+	public int getUpoint() {
 		return upoint;
 	}
 	@Override
