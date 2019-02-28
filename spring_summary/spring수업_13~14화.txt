@@ -1,0 +1,180 @@
+﻿13화
+--------------------------------------------------------------------------------
+1. 트랜잭션; 글쓰기 + 포인트 10점 부여 // 글읽기 + 열람시간 수정 + 포인트 부여 5점
+		
+- src\main\java\com\example\spring02\model\message\dao - > PointDAO(interface 생성)
+
+package com.example.spring02.model.message.dao;
+
+public interface PointDAO {
+	public void updatePoint(String userid, int point);
+}
+
+
+- src\main\java\com\example\spring02\model\message\dao - > PointDAOImpl(생성)
+
+package com.example.spring02.model.message.dao;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class PointDAOImpl implements PointDAO{
+	
+	@Inject
+	SqlSession sqlSession;
+	
+	@Override
+	public void updatePoint(String userid, int point) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("userid", userid);
+		map.put("point", point);
+		//2개 이상의 값을 전달할 경우 - dto, map
+		sqlSession.update("point.updatePoint", map);
+	}
+
+}
+
+- src\main\resources\mappers\message - > pointMapper (xml 생성)
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="point">
+
+	<update id="updatePoint">
+		update tbl_user
+		   set upoint = upoint + #{point}
+		 where userid = #{userid}
+	</update>
+	
+</mapper>
+
+- com.example.spring02.service -> message (package 생성)
+- com.example.spring02.service.message -> MessageService(interface 생성)
+
+package com.example.spring02.service.message;
+
+import com.example.spring02.model.message.dto.MessageDTO;
+
+public interface MessageService {
+	public void addMessage(MessageDTO dto);
+	public MessageDTO readMessage(String userid, int mid);
+}
+
+- 트랜잭션 처리(거래처리 단위)
+ 트랜잭션이 완료되지 않은 상태에서 에러가 발생할 경우 데이터에 오류가 발생함
+예를 들어 메시지는 전닫되나 포인트는 안올라가는 문제가 발생할 수 있음.
+
+* root-context.xml -> (두번째 탭)Namespaces -> tx 채크 확인. (servlet-context도 확인)
+* root-context.xml 태그 추가 (맨 아래에 추가 했음)
+
+	<!-- 트랜잭션 관련 설정 -->
+	<bean id="transactionManager"
+		  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 트랜잭션 관련 애노테이션을 자동 인식하는 옵션-->
+	<tx:annotation-driven/>
+	
+
+
+- com.example.spring02.service.message -> MessageServiceImpl(생성)
+
+package com.example.spring02.service.message;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.spring02.model.message.dao.MessageDAO;
+import com.example.spring02.model.message.dao.PointDAO;
+import com.example.spring02.model.message.dto.MessageDTO;
+
+@Service
+public class MessageServiceImpl implements MessageService {
+
+	 @Inject <<각자 해야한다
+	 MessageDAO messageDao;
+	 @Inject <<각자 해야한다
+	 PointDAO pointDao;
+	 
+	@Transactional << 트랜잭션
+	@Override
+	public void addMessage(MessageDTO dto) {
+		messageDao.create(dto);
+		pointDao.updatePoint(dto.getSender(), 10);
+	}
+
+	@Override
+	public MessageDTO readMessage(String userid, int mid) {
+		// TODO Auto-generated method stub
+		return null; 
+	}
+	 
+
+}
+
+
+- src\main\java\com\example\spring02\controller - > message (package 생성)
+- src\main\java\com\example\spring02\controller\message - > MessageController(생성)
+
+tip) 	@RequestBody : 클라이언트 -> 서버 (json 데이터가 입력될때) 폼을 만들지 않고도; 리턴 값이 json
+	@ResponseBody : 서버 -> 클라이언트 (기존에 사용해 본것); 입력값이 json
+	@ResponseEntity : 컨트롤러를 호출하여 데이터와 http 상태 코드를 동시에 리턴가능하게 함.
+	
+	(객체) ResponseEntity<> ; 리턴값이 json + httpstatus (200,404같은거)
+	
+	구글 크롬 확장 프로그램 설치 ; (검색어) Advanced REST client (설치); 
+  	크롬 오른쪽 상단 점3개 -> 도구 더보기 -> 확장 프로그램 - > ARC 실행
+	 put : 전체 수정 // delete : 삭제 // patch : 일부분 수정
+
+
+package com.example.spring02.controller.message;
+
+import javax.inject.Inject;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.example.spring02.model.message.dto.MessageDTO;
+import com.example.spring02.service.message.MessageService;
+
+@Controller
+@RequestMapping("message/*")
+public class MessageController {
+	
+	@Inject
+	MessageService messageService;
+	
+ 
+	@RequestMapping(value="/", method=RequestMethod.POST)
+	public ResponseEntity<String> addMessage(@RequestBody MessageDTO dto){
+		ResponseEntity<String> entity = null;
+		try {
+			messageService.addMessage(dto);
+			entity = new ResponseEntity<>("success", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			entity = new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return entity;
+	}
+	
+}
+
+	
