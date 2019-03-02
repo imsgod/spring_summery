@@ -48,5 +48,32 @@
 	<!-- aop 설정을 통한 자동적인 proxy 객체 설정 -->
 	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
 	
+	<!--  SampleInterceptor 빈-->
+	<beans:bean id="sampleInterceptor"
+				class="com.example.spring02.interceptor.SampleInterceptor">
+	</beans:bean>
+	
+	<!--  LoginInterceptor 빈-->
+	<beans:bean id="loginInterceptor"
+				class="com.example.spring02.interceptor.LoginInterceptor">
+	</beans:bean>
+	
+	<!-- Interceptor url mapping -->
+	<interceptors>
+		<interceptor> <!-- "sampleInterceptor" 의 인터셉터-->
+			<mapping path="/shop/**"/>
+			<beans:ref bean="sampleInterceptor"/> 
+		</interceptor>
+		
+		<interceptor> <!-- "loginInterceptor" 의 인터셉터-->
+			<mapping path="/shop/cart/list.do"/>
+			<mapping path="/shop/cart/lnsert.do"/>
+			<beans:ref bean="loginInterceptor"/>
+		</interceptor>
+		
+	</interceptors>
+	
+	
+	
 </beans:beans>
 

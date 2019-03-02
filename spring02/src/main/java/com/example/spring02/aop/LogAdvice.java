@@ -15,11 +15,11 @@ public class LogAdvice {
 
 		private static final Logger LOGGERS = LoggerFactory.getLogger(LogAdvice.class);      
 		
-		@Around(
+	/*	@Around(
 		"execution(* com.example.spring02.controller..*Controller.*(..))"
 			+ "or execution(* com.example.spring02.service..*Impl.*(..))"
 			+ "or execution(* com.example.spring02.model..dao.*Impl.*(..))")
-		public Object logPrint(ProceedingJoinPoint joinPoint) 
+*/		public Object logPrint(ProceedingJoinPoint joinPoint) 
 													throws Throwable {
 			
 			long start = System.currentTimeMillis();

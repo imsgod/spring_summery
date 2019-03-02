@@ -27,7 +27,7 @@ public class CartConroller {
 	public ModelAndView listCart(HttpSession session, ModelAndView mav) {
 		Map<String, Object> map = new HashMap<>();
 		String userid = (String) session.getAttribute("userid");
-		if (userid != null) {
+		//if (userid != null) {
 			List<CartDTO> list = cartService.listCart(userid);
 			
 			//장바구니 합계 계산
@@ -44,18 +44,18 @@ public class CartConroller {
 			mav.setViewName("shop/cart_list");
 			mav.addObject("map", map);
 			return mav;
-		} else {
-			return new ModelAndView("member/login", "", null);
-		}
+//		} else {
+//			return new ModelAndView("member/login", "", null);
+//		}
 		
 	}
 	
 	@RequestMapping("insert.do")
 	public String insert(HttpSession session, @ModelAttribute CartDTO dto) {
-		String userid = (String) session.getAttribute("userid");
-		if (userid == null) {
-			return "redirect:/member/login.do";
-		} 
+ 		String userid = (String) session.getAttribute("userid");
+//		if (userid == null) {
+//			return "redirect:/member/login.do";
+//		} 
 		
 		dto.setUserid(userid);
 		cartService.insert(dto);

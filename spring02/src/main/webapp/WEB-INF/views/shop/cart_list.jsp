@@ -54,8 +54,10 @@
 								</td>
 								<td><fmt:formatNumber value="${row.money}" pattern="#,###"/> 원</td>
 								<td>
-									<a href="${path}/shop/cart/delete.do?cart_id=${row.cart_id}">
-					   				삭제</a>
+									<c:if test="${sessionScope.userid != null}">
+										<a href="${path}/shop/cart/delete.do?cart_id=${row.cart_id}">
+						   				삭제</a>
+					   				</c:if>
 								</td>
 							</tr>   
 						</c:forEach>

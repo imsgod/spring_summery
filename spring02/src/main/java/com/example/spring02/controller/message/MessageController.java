@@ -8,29 +8,29 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+//import org.springframework.web.bind.annotation.RestController;
 
 import com.example.spring02.model.message.dto.MessageDTO;
 import com.example.spring02.service.message.MessageService;
 
 @Controller
-@RequestMapping("message/*")
+//@RestController
+@RequestMapping("messages/*") //공통적인 url mapping
 public class MessageController {
-	
 	@Inject
 	MessageService messageService;
-	
- 
 	@RequestMapping(value="/", method=RequestMethod.POST)
-	public ResponseEntity<String> addMessage(@RequestBody MessageDTO dto){
-		ResponseEntity<String> entity = null;
+	public ResponseEntity<String> addMessage(
+			@RequestBody MessageDTO dto){
+		ResponseEntity<String> entity=null;
 		try {
 			messageService.addMessage(dto);
-			entity = new ResponseEntity<>("success", HttpStatus.OK);
+			entity=new ResponseEntity<>("success",HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			entity = new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			entity=new ResponseEntity<>(e.getMessage()
+					,HttpStatus.BAD_REQUEST);
 		}
 		return entity;
 	}
-	
 }
