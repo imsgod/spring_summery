@@ -47,6 +47,14 @@
 			<tr>
 				<td colspan="2" align="center">
 					<input type="button" id="btnLogin" value="로그인">
+					<c:if test="${param.message == 'nologin' }">  
+						<script>
+							alert("로그인 해 주세요.");
+						</script>
+						<div style="color: red;">
+							로그인 해 주세요.
+						</div>
+					</c:if>
 					<c:if test="${message == 'error' }">
 						<div style="color: red;">
 							아이디 또는 비밀번호가 일치 하지 않습니다.

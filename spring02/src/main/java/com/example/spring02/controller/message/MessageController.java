@@ -17,8 +17,10 @@ import com.example.spring02.service.message.MessageService;
 //@RestController
 @RequestMapping("messages/*") //공통적인 url mapping
 public class MessageController {
+	
 	@Inject
 	MessageService messageService;
+	
 	@RequestMapping(value="/", method=RequestMethod.POST)
 	public ResponseEntity<String> addMessage(
 			@RequestBody MessageDTO dto){

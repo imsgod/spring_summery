@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:tx="http://www.springframework.org/schema/tx"
 	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
@@ -48,6 +48,7 @@
 	<!-- aop 설정을 통한 자동적인 proxy 객체 설정 -->
 	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
 	
+	
 	<!--  SampleInterceptor 빈-->
 	<beans:bean id="sampleInterceptor"
 				class="com.example.spring02.interceptor.SampleInterceptor">
@@ -58,18 +59,33 @@
 				class="com.example.spring02.interceptor.LoginInterceptor">
 	</beans:bean>
 	
+	<!--  AdminInterceptor 빈-->
+	<beans:bean id="adminInterceptor"
+				class="com.example.spring02.interceptor.AdminInterceptor">
+	</beans:bean> 
+	
 	<!-- Interceptor url mapping -->
 	<interceptors>
-		<interceptor> <!-- "sampleInterceptor" 의 인터셉터-->
+	
+		<interceptor> <!-- "sampleInterceptor" 의 인터셉터 -->
 			<mapping path="/shop/**"/>
 			<beans:ref bean="sampleInterceptor"/> 
 		</interceptor>
 		
-		<interceptor> <!-- "loginInterceptor" 의 인터셉터-->
+		<interceptor> <!-- "loginInterceptor" 의 인터셉터 -->
 			<mapping path="/shop/cart/list.do"/>
-			<mapping path="/shop/cart/lnsert.do"/>
+			<mapping path="/shop/cart/insert.do"/>
 			<beans:ref bean="loginInterceptor"/>
 		</interceptor>
+		
+		 <interceptor> <!-- AdminInterceptor 의 인터셉터 -->
+			<mapping path="/shop/product/write.do"/>
+			<mapping path="/shop/product/insert.do"/>
+			<mapping path="/pdf/list.do"/>
+			<mapping path="/chart/**"/>
+			<mapping path="/jchart/**"/>
+			<beans:ref bean="adminInterceptor"/>
+		</interceptor> 
 		
 	</interceptors>
 	

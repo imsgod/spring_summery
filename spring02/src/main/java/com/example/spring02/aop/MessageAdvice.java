@@ -20,6 +20,7 @@ public class MessageAdvice {
 			"execution(* com.example.spring02.service.message"
 				+ ".MessageService*.*(..))")
 	public void startLog(JoinPoint jp) {
+		LOGGERS.info("@Before proceeding~~");
 		LOGGERS.info("핵심 업무 코드의 정보 : " + jp.getSignature());
 		LOGGERS.info("method : " + jp.getSignature().getName());
 		LOGGERS.info("매개변수 : " + Arrays.toString(jp.getArgs()));
@@ -29,11 +30,14 @@ public class MessageAdvice {
 			"execution(* com.example.spring02.service.message"
 				+ ".MessageService*.*(..))")
 	public Object timeLog(ProceedingJoinPoint pjp) throws Throwable{
+		//호출전
 		long start = System.currentTimeMillis();
-		
+		LOGGERS.info("@Around-Before proceeding~~");
+		// 비즈니스 로직 실행
 		Object result = pjp.proceed();
-		
+		//호출 후
 		long end = System.currentTimeMillis();
+		LOGGERS.info("@Around-After proceeding~~");
 		LOGGERS.info(pjp.getSignature().getName() + " : " + (end - start));
 		LOGGERS.info("==================================");
 		return result;

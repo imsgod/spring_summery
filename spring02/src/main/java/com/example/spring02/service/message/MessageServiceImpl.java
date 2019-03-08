@@ -20,7 +20,9 @@ public class MessageServiceImpl implements MessageService {
 	@Transactional
 	@Override
 	public void addMessage(MessageDTO dto) {
+		//메시지를 테이블에 저장
 		messageDao.create(dto);
+		// 메시지를 보낸 회원에게 10포인트 추가
 		pointDao.updatePoint(dto.getSender(), 10);
 	}
 

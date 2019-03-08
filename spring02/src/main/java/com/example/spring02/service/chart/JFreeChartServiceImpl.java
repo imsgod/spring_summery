@@ -51,7 +51,7 @@ public class JFreeChartServiceImpl implements JFreeChartService {
 		/*	chart = ChartFactory.createBarChart(title, "상품명", "금액", dataset,
 												PlotOrientation.VERTICAL,true,true,false);*/
 			
-			// createLineChart
+			// createLineChart       
 			/*chart = ChartFactory.createLineChart(title, "상품명", "금액", dataset,
 						PlotOrientation.VERTICAL,true,true,false);*/
 			
@@ -64,7 +64,7 @@ public class JFreeChartServiceImpl implements JFreeChartService {
 			chart.getLegend().setItemFont(new Font("돋음", Font.PLAIN, 10));
 			
 			Font font = new Font("돋음",Font.PLAIN,12);
-			Color color = new Color(0,0,0);
+			Color color = new Color(255,255,255);
 			StandardChartTheme chartTheme =
 					(StandardChartTheme)StandardChartTheme.createJFreeTheme();
 			chartTheme.setExtraLargeFont(font);
@@ -74,6 +74,7 @@ public class JFreeChartServiceImpl implements JFreeChartService {
 			chartTheme.setAxisLabelPaint(color);
 			chartTheme.setLegendItemPaint(color);
 			chartTheme.setItemLabelPaint(color);
+			//폰트,컬러를 차트에 적용  
 			chartTheme.apply(chart);
 			
 		} catch(Exception e)  {

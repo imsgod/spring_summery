@@ -14,8 +14,8 @@
 <a href="${path}/chart/chart1.do">Google Chart(json)</a> |
 <a href="${path}/chart/chart2.do">Google Chart(db)</a> |
 
-<a href="${path}/jchart/chart1.do">JFree Chart(png)</a> |
-<a href="${path}/jchart/chart2.do">JFree Chart(pdf)</a> |
+<a href="${path}/jchart/jchart1.do">JFree Chart(png)</a> |
+<a href="${path}/jchart/jchart2.do">JFree Chart(pdf)</a> |
  
  <div style="text-align: right;">
  	<c:choose> 

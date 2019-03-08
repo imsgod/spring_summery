@@ -15,7 +15,6 @@ import com.example.spring02.service.member.MemberService;
 @Controller
 @RequestMapping("member/*")
 public class MemberController {
-	private static final Logger LOGGERS = LoggerFactory.getLogger(MemberController.class);
 	
 	@Inject
 	MemberService memberService;
