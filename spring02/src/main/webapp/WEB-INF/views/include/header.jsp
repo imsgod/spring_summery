@@ -5,6 +5,12 @@
  
 <c:set var="path" value="${pageContext.request.contextPath}"/> 
 <script src="${path}/include/jquery-3.2.1.min.js"></script>
+<link href="${path}/summernote/bootstrap/css/bootstrap.css" rel="stylesheet">
+<script src="${path}/summernote/bootstrap/js/bootstrap.js"></script> 
+
+<!-- include summernote css/js -->
+<link href="${path}/summernote/summernote.css" rel="stylesheet">
+<script src="${path}/summernote/summernote.js"></script> 
 
  
 <link rel="stylesheet" href="${path}/include/style.css">

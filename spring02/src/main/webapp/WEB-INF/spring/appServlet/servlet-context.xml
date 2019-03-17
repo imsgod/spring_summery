@@ -23,6 +23,9 @@
 	<resources mapping="/include/**" 	location="/WEB-INF/views/include/" />
 	<resources mapping="/images/**"		location="/WEB-INF/views/images/" />
 	<resources mapping="/json/**"		location="/WEB-INF/views/json/" />
+	<resources mapping="/ckeditor/**"	location="/WEB-INF/views/ckeditor/" />
+	<resources mapping="/summernote/**"	location="/WEB-INF/views/summernote/" />
+	
 	<!-- Resolves views selected for rendering by @Controllers to .jsp resources 
 		in the /WEB-INF/views directory -->
 	<beans:bean
@@ -36,7 +39,7 @@
 	<!-- 파일 업로드 관련 설정 -->
 	<beans:bean id="multipartResolver"
 				class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-			<beans:property name="maxUploadSize" value="10485760"></beans:property>
+			<beans:property name="maxUploadSize" value="20485760"></beans:property>
 	</beans:bean>
 	
  	<!--  파일 업로드를 위한 디렉토리 설정-->
@@ -73,6 +76,11 @@
 		</interceptor>
 		
 		<interceptor> <!-- "loginInterceptor" 의 인터셉터 -->
+			<mapping path="/board/write.do"/>
+			<mapping path="/board/insert.do"/>
+			<mapping path="/board/update.do"/>
+			<mapping path="/board/delete.do"/>
+			
 			<mapping path="/shop/cart/list.do"/>
 			<mapping path="/shop/cart/insert.do"/>
 			<beans:ref bean="loginInterceptor"/>
@@ -84,6 +92,7 @@
 			<mapping path="/pdf/list.do"/>
 			<mapping path="/chart/**"/>
 			<mapping path="/jchart/**"/>
+			<mapping path="/email/**"/>
 			<beans:ref bean="adminInterceptor"/>
 		</interceptor> 
 		

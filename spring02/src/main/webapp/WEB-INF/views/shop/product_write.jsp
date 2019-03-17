@@ -6,6 +6,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Insert title here</title>
 <%@ include file="../include/header.jsp" %>
+<script src="${path}/ckeditor/ckeditor.js"></script>
 </head>
 <body>
 <%@ include file="../include/admin_menu.jsp" %>
@@ -28,11 +29,11 @@
 			$("#price").focus();
 			return;
 		}
-		if (description == "") {
+		/* if (description == "") {
 			alert("상품 성명을 입력하세요.")
 			$("#description").focus();
 			return;
-		}
+		} */
 		
 		document.form1.action = "${path}/shop/product/insert.do";
 		document.form1.submit();
@@ -60,8 +61,13 @@
 	  	<tr>
 	  		<td>상품 설명</td>
 	  		<td>
-	  			<textarea rows="5" cols="60" name="description" id="description">
-	  			</textarea>
+	  			<textarea rows="5" cols="60" name="description" id="description"></textarea>
+	  			<script>
+	  				//CKEDITOR.replace("description")
+	  				CKEDITOR.replace("description",{
+	  					filebrowserUploadUrl : "${path}/imageUpload.do"
+	  				});
+	  			</script>
 	  		</td>
 	  	</tr>
 	  	<tr>

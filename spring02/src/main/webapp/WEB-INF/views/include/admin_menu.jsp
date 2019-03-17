@@ -5,6 +5,12 @@
  
 <c:set var="path" value="${pageContext.request.contextPath}"/> 
 <script src="${path}/include/jquery-3.2.1.min.js"></script>
+<link href="${path}/summernote/bootstrap/css/bootstrap.css" rel="stylesheet">
+<script src="${path}/summernote/bootstrap/js/bootstrap.js"></script> 
+
+<!-- include summernote css/js -->
+<link href="${path}/summernote/summernote.css" rel="stylesheet">
+<script src="${path}/summernote/summernote.js"></script> 
 
  
 <a href="${path}/shop/product/list.do">상품 목록</a> |
@@ -16,6 +22,7 @@
 
 <a href="${path}/jchart/jchart1.do">JFree Chart(png)</a> |
 <a href="${path}/jchart/jchart2.do">JFree Chart(pdf)</a> |
+<a href="${path}/email/write.do">이메일 발송</a> |
  
  <div style="text-align: right;">
  	<c:choose> 

@@ -22,7 +22,7 @@
 </h1>
 
 <P>  The time on the server is ${serverTime}. </P>
-	<%-- <%=application.getRealPath("/") %> --%>
+	<%-- 실제로 서비스되는 디렉토리(배포 디렉토리)--%>
 	<%= application.getRealPath("WEB-IF/views/images/") %>
 </body>
 </html>

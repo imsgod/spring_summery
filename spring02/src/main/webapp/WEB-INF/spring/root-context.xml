@@ -12,7 +12,8 @@
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<!-- 드라이버 클래스 이름이 변경됨 -->
-		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
+		<property name="driverClassName"
+			value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
 		<!-- 연결문자열에 log4jdbc가 추가됨 -->
 		<property name="url"
 			value="jdbc:log4jdbc:oracle:thin:@localhost:1521:orcl" />
@@ -26,28 +27,50 @@
 		<property name="username" value="java" /> <property name="password" value="java1234" 
 		/> </bean> -->
 	<!-- SqlSessionFactory 객체 주입 -->
-	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
-		<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
-		<property name="mapperLocations" value="classpath:mappers/**/*Mapper.xml"></property>
+		<property name="configLocation"
+			value="classpath:/mybatis-config.xml"></property>
+		<property name="mapperLocations"
+			value="classpath:mappers/**/*Mapper.xml"></property>
 	</bean>
 	<!-- SqlSession 객체 주입 -->
-	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate"
+	<bean id="sqlSession"
+		class="org.mybatis.spring.SqlSessionTemplate"
 		destroy-method="clearCache">
-		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"></constructor-arg>
+		<constructor-arg name="sqlSessionFactory"
+			ref="sqlSessionFactory"></constructor-arg>
 	</bean>
-	
-	<!-- mybatis mapper interface bean 을 등록해서 검색하도록  -->
-	<mybatis-spring:scan base-package="com.example.spring02.model.memo"/>
-	
+
+	<!-- mybatis mapper interface bean 을 등록해서 검색하도록 -->
+	<mybatis-spring:scan
+		base-package="com.example.spring02.model.memo" />
+
 	<!-- 트랜잭션 관련 설정 -->
 	<bean id="transactionManager"
-		  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
-	
-	<!-- 트랜잭션 관련 애노테이션을 자동 인식하는 옵션-->
-	<tx:annotation-driven/>
+
+	<!-- 트랜잭션 관련 애노테이션을 자동 인식하는 옵션 -->
+	<tx:annotation-driven />
+
+	<!-- 이메일 발송 bean 설정 -->
+	<bean id="mailSender"
+		class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com" />
+		<property name="port" value="587" />
+		<property name="username" value="imsiks750s@gmail.com" />
+		<property name="password" value="753.siIDC20!$951" />
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.transport.protocol">smtp</prop>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.debug">true</prop>
+			</props>
+		</property>
+	</bean>
+
 </beans>
-
-

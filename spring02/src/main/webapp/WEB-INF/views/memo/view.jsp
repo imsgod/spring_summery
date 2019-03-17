@@ -6,9 +6,20 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Insert title here</title>
 <%@ include file="../include/header.jsp" %>
+<link href="${path}/summernote/bootstrap/css/bootstrap.css" rel="stylesheet">
+<script src="${path}/summernote/bootstrap/js/bootstrap.js"></script> 
 
+<!-- include summernote css/js -->
+<link href="${path}/summernote/summernote.css" rel="stylesheet">
+<script src="${path}/summernote/summernote.js"></script> 
 <script>
 	$(function() {
+		
+		$("#memo").summernote({
+			width: 800,
+			height:300
+		});
+		
 		$("#btnUpdate").click(function(){
 			document.form1.action="${path}/memo/update/${dto.idx}";
 			document.form1.submit();
@@ -41,7 +52,9 @@
 			</tr>
 			<tr>
 				<td>메모</td>
-				<td><input name="memo" value="${dto.memo}" size="50"> </td>
+				<%--<td> <input name="memo" value="${dto.memo}" size="50"> </td>--%>
+				<td><textarea rows="5" cols="60" name="memo"id="name">${dto.memo}</textarea></td>	
+				
 			</tr>
 			<tr align="center">
 				<td colspan="2">
